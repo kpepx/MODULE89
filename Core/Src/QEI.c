@@ -5,18 +5,22 @@
 
 #include "QEI.h"
 
-//if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_2))
-//	  	  {
-//	  	     sprintf(MSG, "Encoder Switch Released, Encoder Ticks = %d\n\r", ((TIM2->CNT)>>2));
-//	  	     HAL_UART_Transmit(&huart3, MSG, sizeof(MSG), 100);
-//	  	  }
-//	  	 else
-//	  	  {
-//	  	     sprintf(MSG, "Encoder Switch Pressed,  Encoder Ticks = %d\n\r", ((TIM2->CNT)>>2));
-//	  	     HAL_UART_Transmit(&huart3, MSG, sizeof(MSG), 100);
-//	  	  }
-//	  	 HAL_Delay(100);
-//
-//	  	 //PWM Code 65535 pre loop
-//	  	 TIM8->CCR1 = CH1_DC;
-//	  	 CH1_DC += 1;
+//Encoder TIM1 use for Joint 1
+//Encoder TIM3 use for Joint 2
+//Encoder TIM4 use for Joint 3
+//TIM2 is Spare
+
+static encoder_state encoders[NUM_ENCODER];
+
+void Encoder_Start(int num, TIM_HandleTypeDef * qeiTimer, uint32_t qeiChannel){ //Start All Encoder
+	encoder_state * encoder = &encoders[num];
+	HAL_TIM_Encoder_Start(qeiTimer, qeiChannel);
+	encoder->number = num;
+	encoder->QEI_TIMER = qeiTimer;
+	encoder->QEI_CHANNEL = qeiChannel;
+}
+
+int Get_Value_Encoder(int num){ //Read Encoder Select by input num
+	encoder_state * encoder = &encoders[num];
+	return __HAL_TIM_GET_COUNTER(encoder->QEI_TIMER); //return value to use
+}

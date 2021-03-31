@@ -1,0 +1,2 @@
+QEI.c:15:6:Encoder_Start	32	static
+QEI.c:23:5:Get_Value_Encoder	24	static

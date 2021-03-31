@@ -38,6 +38,7 @@
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 #include "QEI.h"
+#include "PID.h"
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -168,17 +169,30 @@ int main(void)
   MX_TIM17_Init();
   MX_UART5_Init();
   /* USER CODE BEGIN 2 */
-  HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_ALL);
+  setupPID(1, 10, 50, 150, 1, 2, 3);
+  setupPID(2, 110, 510, 1150, 11, 12, 13);
+  setupPID(3, 110, 510, 1510, 11, 21, 31);
+//  HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_ALL);
+  Encoder_Start(1, &htim1, TIM_CHANNEL_ALL);
+  Encoder_Start(2, &htim3, TIM_CHANNEL_ALL);
+  Encoder_Start(3, &htim4, TIM_CHANNEL_ALL);
 //  HAL_TIM_PWM_Start(&htim13, TIM_CHANNEL_1);
 //  __HAL_TIM_SET_COMPARE(&htim13, TIM_CHANNEL_1, 0);
+  //htim12 DIR PF5
+  //htim13 DIR PF4
+  //htim16 DIR PE8
+  //htim17 DIR PF10
+  setupStepper(1, &htim12, TIM_CHANNEL_2, GPIOF, GPIO_PIN_5);
+  setupStepper(2, &htim13, TIM_CHANNEL_1, GPIOF, GPIO_PIN_4);
+  setupStepper(3, &htim16, TIM_CHANNEL_1, GPIOE, GPIO_PIN_8);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  a = __HAL_TIM_GET_COUNTER(&htim4);
-	  b = (TIM4->CNT);
+//	  a = __HAL_TIM_GET_COUNTER(&htim4);
+//	  b = (TIM4->CNT);
 	  //Ft = Fc/(Prescale+1)
 	  //T = (1/Ft)(Cp+1) Cp preiod
 //	  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_9, GPIO_PIN_SET);//Clock wise rotation
