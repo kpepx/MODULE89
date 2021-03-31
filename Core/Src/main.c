@@ -193,59 +193,6 @@ int main(void)
   {
 //	  a = __HAL_TIM_GET_COUNTER(&htim4);
 //	  b = (TIM4->CNT);
-	  //Ft = Fc/(Prescale+1)
-	  //T = (1/Ft)(Cp+1) Cp preiod
-//	  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_9, GPIO_PIN_SET);//Clock wise rotation
-//	  for(uint8_t duty=0; duty<99; duty++){
-//		  __HAL_TIM_SET_COMPARE(&htim13, TIM_CHANNEL_1, duty);
-//		  HAL_Delay(20);
-//	  }
-//	  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_9, GPIO_PIN_RESET);//Clock wise rotation
-//	  	  for(uint8_t duty=0; duty<99; duty++){
-//	  		  __HAL_TIM_SET_COMPARE(&htim13, TIM_CHANNEL_1, duty);
-//	  		  HAL_Delay(20);
-//	  	  }
-
-//	  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_9, GPIO_PIN_SET);//Clock wise rotation
-//
-//	  		for(int i=1;i<=2000;i++){  //Moving stepper motor forward
-//	  			HAL_GPIO_WritePin(GPIOG, GPIO_PIN_1, GPIO_PIN_SET);
-//	  			HAL_Delay(2);
-//	  			HAL_GPIO_WritePin(GPIOG, GPIO_PIN_1, GPIO_PIN_RESET);
-//	  			HAL_Delay(2);
-//	  		}
-//
-//	  	HAL_GPIO_WritePin(GPIOF, GPIO_PIN_9, GPIO_PIN_RESET);//Anti clock wise rotation
-//
-//	  		for(int j=1;j<=2000;j++){  //Moving stepper motor forward
-//	  			HAL_GPIO_WritePin(GPIOG, GPIO_PIN_1, GPIO_PIN_SET);
-//	  			HAL_Delay(2);
-//	  			HAL_GPIO_WritePin(GPIOG, GPIO_PIN_1, GPIO_PIN_RESET);
-//	  			HAL_Delay(2);
-//	  		}
-	  //recieve data
-//	  uint8_t b = 0;
-//	  HAL_UART_Receive(&huart7, b, 8, 10);
-	  //sent data
-//	  uint8_t a = 0xFF;
-//	  HAL_UART_Transmit(&huart7, (uint8_t *) a, 8, 10);
-	  //show encoder by CNT
-
-//	  	if(HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_2))
-//	  	  {
-//	  	     sprintf(MSG, "Encoder Switch Released, Encoder Ticks = %d\n\r", ((TIM2->CNT)>>2));
-//	  	     HAL_UART_Transmit(&huart3, MSG, sizeof(MSG), 100);
-//	  	  }
-//	  	 else
-//	  	  {
-//	  	     sprintf(MSG, "Encoder Switch Pressed,  Encoder Ticks = %d\n\r", ((TIM2->CNT)>>2));
-//	  	     HAL_UART_Transmit(&huart3, MSG, sizeof(MSG), 100);
-//	  	  }
-//	  	 HAL_Delay(100);
-//
-//	  	 //PWM Code 65535 pre loop
-//	  	 TIM8->CCR1 = CH1_DC;
-//	  	 CH1_DC += 1;
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -282,8 +229,8 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
-  RCC_OscInitStruct.PLL.PLLM = 4;
-  RCC_OscInitStruct.PLL.PLLN = 25;
+  RCC_OscInitStruct.PLL.PLLM = 32;
+  RCC_OscInitStruct.PLL.PLLN = 129;
   RCC_OscInitStruct.PLL.PLLP = 2;
   RCC_OscInitStruct.PLL.PLLQ = 4;
   RCC_OscInitStruct.PLL.PLLR = 2;
@@ -301,9 +248,9 @@ void SystemClock_Config(void)
                               |RCC_CLOCKTYPE_D3PCLK1|RCC_CLOCKTYPE_D1PCLK1;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.SYSCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB3CLKDivider = RCC_APB3_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_APB1_DIV2;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_APB1_DIV1;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_APB2_DIV1;
   RCC_ClkInitStruct.APB4CLKDivider = RCC_APB4_DIV1;
 
@@ -489,7 +436,7 @@ static void MX_TIM1_Init(void)
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  sConfig.EncoderMode = TIM_ENCODERMODE_TI1;
+  sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
   sConfig.IC1Polarity = TIM_ICPOLARITY_RISING;
   sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC1Prescaler = TIM_ICPSC_DIV1;
@@ -588,7 +535,7 @@ static void MX_TIM3_Init(void)
   htim3.Init.Period = 65535;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  sConfig.EncoderMode = TIM_ENCODERMODE_TI1;
+  sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
   sConfig.IC1Polarity = TIM_ICPOLARITY_RISING;
   sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC1Prescaler = TIM_ICPSC_DIV1;
@@ -729,7 +676,7 @@ static void MX_TIM12_Init(void)
   htim12.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim12.Init.Period = 65535;
   htim12.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim12.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  htim12.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_PWM_Init(&htim12) != HAL_OK)
   {
     Error_Handler();
@@ -767,11 +714,11 @@ static void MX_TIM13_Init(void)
 
   /* USER CODE END TIM13_Init 1 */
   htim13.Instance = TIM13;
-  htim13.Init.Prescaler = 50;
+  htim13.Init.Prescaler = 0;
   htim13.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim13.Init.Period = 65535;
   htim13.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim13.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  htim13.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_Base_Init(&htim13) != HAL_OK)
   {
     Error_Handler();
@@ -819,7 +766,7 @@ static void MX_TIM16_Init(void)
   htim16.Init.Period = 65535;
   htim16.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim16.Init.RepetitionCounter = 0;
-  htim16.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  htim16.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_Base_Init(&htim16) != HAL_OK)
   {
     Error_Handler();
@@ -882,7 +829,7 @@ static void MX_TIM17_Init(void)
   htim17.Init.Period = 65535;
   htim17.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim17.Init.RepetitionCounter = 0;
-  htim17.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  htim17.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_Base_Init(&htim17) != HAL_OK)
   {
     Error_Handler();

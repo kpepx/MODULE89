@@ -33,3 +33,40 @@ void setupStepper(int num, TIM_HandleTypeDef * stepTimer, uint32_t stepChannel, 
 //	  		  __HAL_TIM_SET_COMPARE(&htim13, TIM_CHANNEL_1, duty);
 //	  		  HAL_Delay(20);
 //	  	  }
+
+
+//Calculate Frequency
+//Fpwm = Fclk/((ARR+1)*(PSC+1))
+
+//Calculate Duty Cycle
+//Duty = CCRx/ARRx
+
+
+//Change Pulse PWM width
+//Change duty Cycle
+//void user_pwm_setvalue(uint16_t value)
+//{
+//    TIM_OC_InitTypeDef sConfigOC;
+//
+//    sConfigOC.OCMode = TIM_OCMODE_PWM1;
+//    sConfigOC.Pulse = value;
+//    sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+//    sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+//    HAL_TIM_PWM_ConfigChannel(&htim4, &sConfigOC, TIM_CHANNEL_1);
+//    HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
+//}
+
+//void setPWM(TIM_HandleTypeDef timer, uint32_t channel, uint16_t period,
+//uint16_t pulse)
+//{
+// HAL_TIM_PWM_Stop(&timer, channel); // stop generation of pwm
+// TIM_OC_InitTypeDef sConfigOC;
+// timer.Init.Period = period; // set the period duration
+// HAL_TIM_PWM_Init(&timer); // reinititialise with new period value
+// sConfigOC.OCMode = TIM_OCMODE_PWM1;
+// sConfigOC.Pulse = pulse; // set the pulse duration
+// sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+// sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+// HAL_TIM_PWM_ConfigChannel(&timer, &sConfigOC, channel);
+// HAL_TIM_PWM_Start(&timer, channel); // start pwm generation
+//}
