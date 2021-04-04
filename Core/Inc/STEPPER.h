@@ -9,6 +9,8 @@
 #include "stm32h7xx_hal.h"
 
 #define NUM_STEPPER 4
+#define DEFAULT_MIN_SPEED 1
+#define DEFAULT_MAX_SPEED 400000
 
 typedef struct{
 	//number
@@ -32,8 +34,13 @@ typedef struct{
 	//Setup acceleration
 	volatile int32_t acceleration;
 
+	//
+	volatile int32_t currentTimer;
+
 
 }stepper_state;
+
+extern uint32_t STEP_TIMER_CLOCK;
 
 void setupStepper(int num, TIM_HandleTypeDef * stepTimer, uint32_t stepChannel, GPIO_TypeDef * dirGPIO, uint16_t dirPIN);
 
