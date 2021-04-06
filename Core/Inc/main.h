@@ -80,8 +80,8 @@ void Error_Handler(void);
 #define Current_2_GPIO_Port GPIOC
 #define QEI4A_Pin GPIO_PIN_5
 #define QEI4A_GPIO_Port GPIOA
-#define PLUSE3_Pin GPIO_PIN_6
-#define PLUSE3_GPIO_Port GPIOA
+#define PULSE3_Pin GPIO_PIN_6
+#define PULSE3_GPIO_Port GPIOA
 #define LD1_Pin GPIO_PIN_0
 #define LD1_GPIO_Port GPIOB
 #define DIR3_Pin GPIO_PIN_8
@@ -94,8 +94,8 @@ void Error_Handler(void);
 #define PC_RX_GPIO_Port GPIOB
 #define LD3_Pin GPIO_PIN_14
 #define LD3_GPIO_Port GPIOB
-#define PLUSE4_Pin GPIO_PIN_15
-#define PLUSE4_GPIO_Port GPIOB
+#define PULSE4_Pin GPIO_PIN_15
+#define PULSE4_GPIO_Port GPIOB
 #define STLINK_RX_Pin GPIO_PIN_8
 #define STLINK_RX_GPIO_Port GPIOD
 #define STLINK_TX_Pin GPIO_PIN_9
@@ -126,10 +126,10 @@ void Error_Handler(void);
 #define QEI2B_GPIO_Port GPIOB
 #define PC_TX_Pin GPIO_PIN_6
 #define PC_TX_GPIO_Port GPIOB
-#define PLUSE1_Pin GPIO_PIN_8
-#define PLUSE1_GPIO_Port GPIOB
-#define PLUSE2_Pin GPIO_PIN_9
-#define PLUSE2_GPIO_Port GPIOB
+#define PULSE1_Pin GPIO_PIN_8
+#define PULSE1_GPIO_Port GPIOB
+#define PULSE2_Pin GPIO_PIN_9
+#define PULSE2_GPIO_Port GPIOB
 #define LD2_Pin GPIO_PIN_1
 #define LD2_GPIO_Port GPIOE
 /* USER CODE BEGIN Private defines */

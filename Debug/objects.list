@@ -1,6 +1,7 @@
 "Core/Src/PID.o"
 "Core/Src/QEI.o"
 "Core/Src/STEPPER.o"
+"Core/Src/TRAJECTORY.o"
 "Core/Src/main.o"
 "Core/Src/stm32h7xx_hal_msp.o"
 "Core/Src/stm32h7xx_it.o"

@@ -60,6 +60,11 @@ void EXTI4_IRQHandler(void);
 void DMA1_Stream1_IRQHandler(void);
 void EXTI9_5_IRQHandler(void);
 void TIM4_IRQHandler(void);
+void TIM8_BRK_TIM12_IRQHandler(void);
+void TIM8_UP_TIM13_IRQHandler(void);
+void TIM5_IRQHandler(void);
+void TIM16_IRQHandler(void);
+void TIM17_IRQHandler(void);
 void BDMA_Channel0_IRQHandler(void);
 /* USER CODE BEGIN EFP */
 

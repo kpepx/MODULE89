@@ -90,6 +90,8 @@ DMA_HandleTypeDef hdma_uart7_rx;
 PCD_HandleTypeDef hpcd_USB_OTG_FS;
 
 /* USER CODE BEGIN PV */
+uint32_t STEP_TIMER_CLOCK;
+uint32_t STEP_CONTROLLER_PERIOD_US;
 int a = 0;
 int b = 0;
 /* USER CODE END PV */
@@ -115,7 +117,7 @@ static void MX_TIM16_Init(void);
 static void MX_TIM17_Init(void);
 static void MX_UART5_Init(void);
 /* USER CODE BEGIN PFP */
-
+void TIM8_BRK_TIM12_IRQHandler(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -169,30 +171,56 @@ int main(void)
   MX_TIM17_Init();
   MX_UART5_Init();
   /* USER CODE BEGIN 2 */
-  setupPID(1, 10, 50, 150, 1, 2, 3);
-  setupPID(2, 110, 510, 1150, 11, 12, 13);
-  setupPID(3, 110, 510, 1510, 11, 21, 31);
+  STEP_TIMER_CLOCK = HAL_RCC_GetHCLKFreq();
+  STEP_CONTROLLER_PERIOD_US =  1000000U /(HAL_RCC_GetHCLKFreq() / htim5.Init.Period);
+
+  Stepper_SetupPeripherals(1, &htim12, TIM_CHANNEL_2, DIR1_GPIO_Port, DIR1_Pin);
+  Stepper_SetupPeripherals(2, &htim13, TIM_CHANNEL_1, DIR2_GPIO_Port, DIR2_Pin);
+  Stepper_SetupPeripherals(3, &htim16, TIM_CHANNEL_1, DIR3_GPIO_Port, DIR3_Pin);
+
+  Stepper_InitDefaultState(1);
+  Stepper_InitDefaultState(2);
+  Stepper_InitDefaultState(3);
+
+  __HAL_TIM_ENABLE_IT(&htim12, TIM_IT_UPDATE);
+  __HAL_TIM_ENABLE_IT(&htim13, TIM_IT_UPDATE);
+  __HAL_TIM_ENABLE_IT(&htim16, TIM_IT_UPDATE);
+
+  //Timer Interrupt Control
+  HAL_TIM_Base_Start_IT(&htim5);
+//  setupPID(1, 10, 50, 150, 1, 2, 3);
+//  setupPID(2, 110, 510, 1150, 11, 12, 13);
+//  setupPID(3, 110, 510, 1510, 11, 21, 31);
 //  HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_ALL);
-  Encoder_Start(1, &htim1, TIM_CHANNEL_ALL);
-  Encoder_Start(2, &htim3, TIM_CHANNEL_ALL);
-  Encoder_Start(3, &htim4, TIM_CHANNEL_ALL);
-//  HAL_TIM_PWM_Start(&htim13, TIM_CHANNEL_1);
-//  __HAL_TIM_SET_COMPARE(&htim13, TIM_CHANNEL_1, 0);
+//  Encoder_Start(1, &htim1, TIM_CHANNEL_ALL);
+//  Encoder_Start(2, &htim3, TIM_CHANNEL_ALL);
+//  Encoder_Start(3, &htim4, TIM_CHANNEL_ALL);
+//  HAL_TIM_PWM_Start(&htim12, TIM_CHANNEL_2);
+//  __HAL_TIM_SET_COMPARE(&htim12, TIM_CHANNEL_2, 25000);
+//  __HAL_TIM_SET_COUNTER(&htim12, 1000);
   //htim12 DIR PF5
   //htim13 DIR PF4
   //htim16 DIR PE8
   //htim17 DIR PF10
-  setupStepper(1, &htim12, TIM_CHANNEL_2, GPIOF, GPIO_PIN_5);
-  setupStepper(2, &htim13, TIM_CHANNEL_1, GPIOF, GPIO_PIN_4);
-  setupStepper(3, &htim16, TIM_CHANNEL_1, GPIOE, GPIO_PIN_8);
+//  Stepper_Setup(1, &htim12, TIM_CHANNEL_2, DIR1_GPIO_Port, DIR1_Pin, 0);
+//  Stepper_SetMaxMinPosition(1, 0, 3000);
+//  Stepper_Setup(2, &htim13, TIM_CHANNEL_1, DIR2_GPIO_Port, DIR2_Pin, M_SCALAR);
+//  Stepper_Setup(3, &htim16, TIM_CHANNEL_1, DIR3_GPIO_Port, DIR3_Pin, M_SCALAR);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-//	  a = __HAL_TIM_GET_COUNTER(&htim4);
-//	  b = (TIM4->CNT);
+	  Stepper_SetTargetPosition(1, 10);
+
+
+//	  HAL_GPIO_WritePin(DIR1_GPIO_Port, DIR1_Pin, GPIO_PIN_SET);//Clock wise rotation
+//	  htim12.Instance -> PSC = 1;
+//	  htim12.Instance -> ARR = 10000;
+//	  __HAL_TIM_SET_COMPARE(&htim12, TIM_CHANNEL_2, 5000);
+//	  b = htim12.Init.Period;
+//
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -630,7 +658,7 @@ static void MX_TIM5_Init(void)
   htim5.Instance = TIM5;
   htim5.Init.Prescaler = 0;
   htim5.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim5.Init.Period = 4294967295;
+  htim5.Init.Period = 100000;
   htim5.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim5.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim5) != HAL_OK)
@@ -673,7 +701,7 @@ static void MX_TIM12_Init(void)
 
   /* USER CODE END TIM12_Init 1 */
   htim12.Instance = TIM12;
-  htim12.Init.Prescaler = 99;
+  htim12.Init.Prescaler = 1;
   htim12.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim12.Init.Period = 50000;
   htim12.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -1152,6 +1180,53 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+	if(htim == &htim5){
+		if (__HAL_TIM_GET_FLAG(&htim5, TIM_FLAG_UPDATE))
+		  {
+		    if (__HAL_TIM_GET_ITSTATUS(&htim5, TIM_IT_UPDATE))
+		    {
+//		      HAL_GPIO_WritePin(GPIOA, LED_Pin, GPIO_PIN_SET);
+		      __HAL_TIM_CLEAR_FLAG(&htim5, TIM_FLAG_UPDATE);
+
+		      Stepper_ExecuteAllControllers();
+
+//		      HAL_GPIO_WritePin(GPIOA, LED_Pin, GPIO_PIN_RESET);
+		    }
+		  }
+	}
+	if(htim==&htim12){
+		if (__HAL_TIM_GET_FLAG(&htim12, TIM_FLAG_UPDATE))
+		  {
+		    if (__HAL_TIM_GET_ITSTATUS(&htim12, TIM_IT_UPDATE))
+		    {
+		      __HAL_TIM_CLEAR_FLAG(&htim12, TIM_FLAG_UPDATE);
+		      Stepper_PulseTimerUpdate(1);
+		    }
+		  }
+	}
+	if (htim == &htim13){
+		if (__HAL_TIM_GET_FLAG(&htim13, TIM_FLAG_UPDATE))
+		  {
+		    if (__HAL_TIM_GET_ITSTATUS(&htim13, TIM_IT_UPDATE))
+		    {
+		      __HAL_TIM_CLEAR_FLAG(&htim13, TIM_FLAG_UPDATE);
+		      Stepper_PulseTimerUpdate(2);
+		    }
+		  }
+	}
+	if (htim == &htim16) {
+		if (__HAL_TIM_GET_FLAG(&htim16, TIM_FLAG_UPDATE))
+		  {
+		    if (__HAL_TIM_GET_ITSTATUS(&htim16, TIM_IT_UPDATE))
+		    {
+		      __HAL_TIM_CLEAR_FLAG(&htim16, TIM_FLAG_UPDATE);
+		      Stepper_PulseTimerUpdate(3);
+		    }
+		  }
+	}
+}
 
 /* USER CODE END 4 */
 
