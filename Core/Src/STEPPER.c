@@ -9,53 +9,32 @@
 
 static stepper_state steppers[NUM_STEPPER];
 
-static int32_t initializedSteppersCount;
-
-void SetAccelerationByMinSPS(stepper_state * stepper) {
-    // MinSPS - is a maximum possible starting stepper speed, so it also defines maximum possible acceleration
-    // Lets assume that accual acceleration should be at 80% level of minimum starting speed (ACCSPS_TO_MINSPS_RATIO).
-
-    // We have stepper controler clock which defines how often we can update the CurrentSPS
-    // Lets get the floating point AccSPS value first, if we would update it every ACCSPS_TO_MINSPS_RATIO
-    float fAccSPS = ACCSPS_TO_MINSPS_RATIO * STEP_CONTROLLER_PERIOD_US * stepper->minSPS / 1000000.0f;
-
-    // But we can't update SPS by floating point value,
-    // this steppers controller alghoritm using int32_t arifmetics to control CurrentSPS
-    // Translating the floating point acceleration value into "Prescaller + discreete AccSPS"
-    // allows to use CPU time more effectively, without unncessary frequent updates
-    // of Stepping Timer pulse frequency on every tick of controller clock (STEP_CONTROLLER_PERIOD_US).
-
-    if (fAccSPS > 10.0f) {
-        stepper->stepCtrlPrescallerTicks =
-        stepper->stepCtrlPrescaller = 1;
-        stepper->accelerationSPS = fAccSPS; // In worst case scenario, like 10.99 we will get 10% less (0.99 out of almost 11.00) acceleration
-    } else {
-        // Here it is better to use prescaller
-        uint32_t prescalerValue = 1;
-        float prescaledAccSPS = fAccSPS;
-        float remainder = prescaledAccSPS - (uint32_t)prescaledAccSPS;
-
-        while (prescaledAccSPS < 0.9f || (0.1f < remainder & remainder < 0.9f)) {
-            prescalerValue++;
-            prescaledAccSPS += fAccSPS;
-            remainder = prescaledAccSPS - (uint32_t)prescaledAccSPS;
-        }
-
-        stepper->stepCtrlPrescallerTicks =
-        stepper->stepCtrlPrescaller = prescalerValue;
-        stepper -> accelerationSPS = prescaledAccSPS;
-
-        // Round up if at upper remainder
-        if (remainder > 0.9f)
-            stepper -> accelerationSPS += 1;
-    }
+//Setup variable to use in stepper
+stepper_error Stepper_Setup(int num, TIM_HandleTypeDef * stepTimer, uint32_t stepChannel, GPIO_TypeDef * dirGPIO, uint16_t dirPIN, stepper_mode mode){
+	stepper_state * stepper = &steppers[num];
+	stepper->number = num;
+	stepper->STEP_TIMER = stepTimer;
+	stepper->STEP_CHANNEL = stepChannel;
+	stepper->DIR_GPIO = dirGPIO;
+	stepper->DIR_PIN = dirPIN;
+	stepper->modeStepper = mode;
+	return SERR_OK;
 }
 
-void SetStepTimerByCurrentSPS(stepper_state * stepper){
+//Set limit max/min Position
+stepper_error Stepper_SetMaxMinPosition(int num, int32_t minPos, int32_t maxPos){
+	stepper_state * stepper = &steppers[num];
+	stepper->minPosition = minPos;
+	stepper->maxPosition = maxPos;
+	return SERR_OK;
+}
+
+//Update Frequency PWM and set duty 50%
+void Stepper_SetStepTimer(stepper_state * stepper){
   if (stepper -> STEP_TIMER != NULL && stepper -> STEP_TIMER -> Instance != NULL){
     TIM_TypeDef * timer = stepper -> STEP_TIMER -> Instance;
     uint32_t prescaler = 0;
-    uint32_t timerTicks = STEP_TIMER_CLOCK / stepper -> currentSPS;
+    uint32_t timerTicks = STEP_TIMER_CLOCK / stepper -> currentSpeed;
 
     if (timerTicks > 0xFFFF) {
         // calculate the minimum prescaler
@@ -65,419 +44,32 @@ void SetStepTimerByCurrentSPS(stepper_state * stepper){
 
     timer -> PSC = prescaler;
     timer -> ARR = timerTicks;
+    __HAL_TIM_SET_COMPARE(stepper->STEP_TIMER, stepper->STEP_CHANNEL, timerTicks/2);
   }
 }
 
-void DecrementSPS(stepper_state * stepper){
-    if (stepper -> currentSPS > stepper -> minSPS){
-        stepper -> currentSPS -=  stepper -> accelerationSPS;
-        SetStepTimerByCurrentSPS(stepper);
-    }
+stepper_error Stepper_DefaultState(int num){
+	stepper_state * stepper = &steppers[num];
+//	if(stepper == NULL){
+//		stepper -> number = num;
+//		stepper -> status = SS_STOPPED;
+//	}
+//	else if (!(stepper -> status & SS_STOPPED)) {
+//		return SERR_MUSTBESTOPPED;
+//	}
+	stepper -> status = SS_STOPPED;
+	stepper -> minSpeed = DEFAULT_MIN_SPEED;
+	stepper -> maxSpeed = DEFAULT_MAX_SPEED;
+	stepper -> currentSpeed = stepper -> minSpeed;
+
+	stepper -> targetPosition = 0;
+	stepper -> currentPosition = 0;
+
+	Stepper_SetStepTimer(stepper);
+
+	return SERR_OK;
 }
 
-void IncrementSPS(stepper_state * stepper){
-    if (stepper -> currentSPS < stepper -> maxSPS) {
-        stepper -> currentSPS +=  stepper -> accelerationSPS;
-        SetStepTimerByCurrentSPS(stepper);
-    }
-}
-
-//stepper_state * GetState(int numStepper) {
-//  int32_t i = initializedSteppersCount;
-//  while(i--){
-//    if (steppers[i].numberStepper == numStepper)
-//      return &steppers[i];
-//  }
-//  // if nothing found - take the default very first stepper in the collection
-//  return (stepper_state *)NULL;
-//}
-
-int32_t GetStepDirectionUnit(stepper_state * stepper){
-    return (stepper->status & SS_RUNNING_BACKWARD) ? -1 : 1;
-}
-
-int64_t GetStepsToTarget(stepper_state * stepper) {
-    // returns absolute value of steps left to target
-    return ((int64_t)stepper->targetPosition - (int64_t)stepper->currentPosition) * GetStepDirectionUnit(stepper);
-}
-
-stepper_error Stepper_SetupPeripherals(int numStepper, TIM_HandleTypeDef * stepTimer, uint32_t stepChannel, GPIO_TypeDef  * dirGPIO, uint16_t dirPIN){
-    // Find existing or init new.
-    stepper_state * stepper = &steppers[numStepper];
-    if (stepper == NULL) {
-        if (initializedSteppersCount == MAX_STEPPERS_COUNT) return SERR_NOMORESTATESAVAILABLE;
-        stepper = &steppers[initializedSteppersCount++];
-        stepper -> numberStepper = numStepper;
-        stepper -> status = SS_STOPPED;
-    } else if (!(stepper->status & SS_STOPPED)) {
-        return SERR_MUSTBESTOPPED;
-    }
-
-    // ensure that ARR preload mode is enabled on timer
-    // but we don't need to set the PWM pulse duration preload, it is constant all the time
-    stepTimer -> Instance -> CR1 |=TIM_CR1_ARPE;
-
-    stepper -> STEP_TIMER       = stepTimer;
-    stepper -> STEP_CHANNEL     = stepChannel;
-    stepper -> DIR_GPIO         = dirGPIO;
-    stepper -> DIR_PIN          = dirPIN;
-
-    return SERR_OK;
-}
-
-stepper_error Stepper_InitDefaultState(int numStepper) {
-    // Find existing or init new.
-    stepper_state * stepper = &steppers[numStepper];
-    if (stepper == NULL) {
-        if (initializedSteppersCount == MAX_STEPPERS_COUNT) return SERR_NOMORESTATESAVAILABLE;
-        stepper = &steppers[initializedSteppersCount++];
-        stepper -> numberStepper = numStepper;
-        stepper -> status = SS_STOPPED;
-    } else if (!(stepper->status & SS_STOPPED)) {
-        return SERR_MUSTBESTOPPED;
-    }
-
-    stepper -> minSPS                   = DEFAULT_MIN_SPS;       // this is like an hour or two per turn in microstepping mode
-    stepper -> maxSPS                   = DEFAULT_MAX_SPS;  // 400kHz is 2.5uS per step, while theoretically possible limit for A4988 dirver is 2uS
-    stepper -> currentSPS               = stepper -> minSPS;
-
-    // zero service fields
-    stepper -> targetPosition           = 0;
-    stepper -> currentPosition          = 0;
-    stepper -> breakInitiationSPS       = stepper -> maxSPS;
-
-    SetAccelerationByMinSPS(stepper);
-    SetStepTimerByCurrentSPS(stepper);
-
-    return SERR_OK;
-}
-
-void ExecuteController(stepper_state * stepper){
-  stepper_status status = stepper -> status;
-
-  if (status & SS_STOPPED) {
-    if (stepper->targetPosition != stepper->currentPosition) {
-     stepper->stepCtrlPrescallerTicks = stepper->stepCtrlPrescaller;
-     stepper->status = SS_STARTING;
-     stepper->STEP_TIMER->Instance->EGR = TIM_EGR_UG;
-     HAL_TIM_PWM_Start(stepper->STEP_TIMER, stepper->STEP_CHANNEL);
-    }
-    return;
-  }
-
-  if (status == SS_STARTING)
-    return;
-
-  stepper->stepCtrlPrescallerTicks--;
-
-  if (!(status & SS_BREAKING))
-  {
-    // check - do we need to break
-    // to do that - we take average speed (between current and minimum)
-    // and using it to calculate how much time left to the stopping point
-
-    // Steps to target deevided by average speed.
-    float estimatedTimeToTarget = 2.0f * GetStepsToTarget(stepper) / (stepper->currentSPS + stepper->minSPS);
-    int32_t spsSwitches        = (stepper->currentSPS - stepper->minSPS) / stepper->accelerationSPS;
-    float timeToReduceSpeed     =
-        (((float)STEP_CONTROLLER_PERIOD_US)/ 1000000.0f) *
-        ((int64_t)(stepper->stepCtrlPrescaller) * spsSwitches + stepper->stepCtrlPrescallerTicks);
-
-    // If we are in condition to start bracking, but not breaking yet
-    if (estimatedTimeToTarget <= timeToReduceSpeed) {
-
-        stepper->breakInitiationSPS = stepper->currentSPS;
-        stepper->status &= ~SS_BREAKCORRECTION;
-        stepper->status |= SS_BREAKING;
-
-        DecrementSPS(stepper);
-
-        // So we terminated onging acceleration, or immidiately switched back from top speed
-        if (stepper->stepCtrlPrescallerTicks == 0)
-            stepper->stepCtrlPrescallerTicks = stepper->stepCtrlPrescaller;
-
-        // we are done with this check
-        return;
-     }
-  }
-
-  if (stepper->stepCtrlPrescallerTicks == 0) {
-    if (status & SS_BREAKING) {
-        // check, mabe we don't need to break any more, because earlier overestimation
-        int32_t spsSwitchesOnBreakeInitiated = (stepper->breakInitiationSPS - stepper->minSPS) / stepper->accelerationSPS;
-        int32_t spsSwitchesLeft              = (stepper->currentSPS         - stepper->minSPS) / stepper->accelerationSPS;
-
-
-        // if we already reduced our speed twice
-        // and we still at sufficient speed
-        // re-evaluete "do we still need breaking, or can relax and roll for a while?"
-        if (spsSwitchesOnBreakeInitiated/2 > spsSwitchesLeft && spsSwitchesLeft > 10) {
-           stepper->status |= SS_BREAKCORRECTION;
-           stepper->status &= ~SS_BREAKING;
-        }
-
-        // we still have to execute breaking transition here
-        DecrementSPS(stepper);
-    }
-    else if (!(status & SS_BREAKCORRECTION)){
-        IncrementSPS(stepper);
-    }
-    stepper->stepCtrlPrescallerTicks = stepper->stepCtrlPrescaller;
-  }
-}
-
-void Stepper_PulseTimerUpdate(int numStepper){
-  stepper_state * stepper = &steppers[numStepper];
-  if (stepper == NULL)
-    return;
-
-  switch (stepper->status & ~(SS_BREAKING|SS_BREAKCORRECTION)){
-    case SS_STARTING:
-      if (stepper->currentPosition > stepper->targetPosition){
-          stepper->status = SS_RUNNING_BACKWARD;
-          stepper->DIR_GPIO->BSRR = (uint32_t)stepper->DIR_PIN << 16u;
-      } else if (stepper->currentPosition < stepper->targetPosition){
-          stepper->status = SS_RUNNING_FORWARD;
-          stepper->DIR_GPIO->BSRR = stepper->DIR_PIN;
-      } else if (stepper->currentPosition == stepper->targetPosition) {
-          stepper->status = SS_STOPPED;
-          HAL_TIM_PWM_Stop(stepper->STEP_TIMER, stepper->STEP_CHANNEL);
-      }
-      break;
-    case SS_RUNNING_FORWARD:
-    case SS_RUNNING_BACKWARD:
-      // The actual pulse has been generated by previous timer run.
-      stepper->currentPosition += GetStepDirectionUnit(stepper); {
-      if (GetStepsToTarget(stepper) <= 0 && stepper -> currentSPS == stepper -> minSPS) {
-          // We reached or passed through our target position at the stopping speed
-          stepper->status = SS_STOPPED;
-          HAL_TIM_PWM_Stop(stepper->STEP_TIMER, stepper->STEP_CHANNEL);
-//          printf("%c.stop:%d\r\n", stepper->numberStepper, stepper->currentPosition);
-      }}
-      break;
-  }
-}
-
-void Stepper_ExecuteAllControllers(void){
-  int32_t i = initializedSteppersCount;
-  if (i==0)
-    return;
-  while(i--)
-    ExecuteController(&steppers[i]);
-}
-
-// Sets the new target position (step number) of the motor (where it should rotate to).
-// THREAD-SAFE (may be invoked at any time)
-// If stepper_status is SS_RUNNING the motor will adjust its state to get to the new target in fastest possible way
-// So, if needed - the motor will break to the full stop and immediatelly will start rotating in oposite direction.
-stepper_error Stepper_SetTargetPosition(int numStepper, int32_t value){
-  stepper_state * stepper = &steppers[numStepper];
-  if (stepper == NULL)
-    return SERR_STATENOTFOUND;
-  stepper->targetPosition = value;
-  return SERR_OK;
-}
-
-// Sets the new value for the current possion of the stepper.
-// So it becomes a new reference point for target value.
-// The same value will be assigned to target position - otherwise the mottor will start moving.
-// NOT THREAD-SAFE (stepper_status must be SS_STOPPED).
-stepper_error Stepper_SetCurrentPosition(int numStepper, int32_t value){
-  stepper_state * stepper = &steppers[numStepper];
-  if (stepper == NULL)
-    return SERR_STATENOTFOUND;
-  if (stepper->status & SS_STOPPED) {
-    stepper->targetPosition  =
-    stepper->currentPosition = value;
-    return SERR_OK;
-  }
-  return SERR_MUSTBESTOPPED;
-}
-
-// Sets the minimum stepper speed (steps-per-second).
-// Min value is 1Hz.
-// Max value is 400kHz{}
-// NOT THREAD-SAFE (stepper_status must be SS_STOPPED).
-stepper_error Stepper_SetMinSPS(int numStepper, int32_t value){
-  stepper_state * stepper = &steppers[numStepper];
-  if (stepper == NULL)
-    return SERR_STATENOTFOUND;
-  if (stepper->status&SS_STOPPED) {
-      stepper_error result = SERR_OK;
-      if (value > DEFAULT_MAX_SPS) {
-        stepper->minSPS = stepper->currentSPS = DEFAULT_MAX_SPS;
-        result = SERR_LIMIT;
-      }
-      else if (value < DEFAULT_MIN_SPS) {
-        stepper->minSPS = stepper->currentSPS = DEFAULT_MIN_SPS;
-        result = SERR_LIMIT;
-      }
-      else {
-        stepper->minSPS = stepper->currentSPS = value;
-      }
-
-      if (stepper->minSPS > stepper->maxSPS)
-        stepper->maxSPS = stepper->minSPS;
-
-      SetAccelerationByMinSPS(stepper);
-      SetStepTimerByCurrentSPS(stepper);
-
-      Stepper_SaveConfig();
-      return result;
-  }
-  return SERR_MUSTBESTOPPED;
-}
-
-// Sets the maximum stepper speed (steps-per-second).
-// Min value is 1Hz.
-// Max value is 400kHz.
-// NOT THREAD-SAFE (stepper_status must be SS_STOPPED).
-stepper_error Stepper_SetMaxSPS(int numStepper, int32_t value){
-  stepper_state * stepper = &steppers[numStepper];
-  if (stepper == NULL)
-    return SERR_STATENOTFOUND;
-  if (stepper->status & SS_STOPPED) {
-      stepper_error result = SERR_OK;
-      if (value > DEFAULT_MAX_SPS) {
-        stepper->maxSPS = DEFAULT_MAX_SPS;
-        result = SERR_LIMIT;
-      }
-      else if (value < DEFAULT_MIN_SPS) {
-        stepper->maxSPS = DEFAULT_MIN_SPS;
-        result = SERR_LIMIT;
-      }
-      else {
-        stepper->maxSPS = value;
-      }
-
-      if (stepper->minSPS > stepper->maxSPS) {
-        stepper->minSPS = stepper->currentSPS = stepper->maxSPS;
-        SetAccelerationByMinSPS(stepper);
-        SetStepTimerByCurrentSPS(stepper);
-      }
-      Stepper_SaveConfig();
-      return result;
-  }
-  return SERR_MUSTBESTOPPED;
-}
-
-// Sets the acceleration, as factor of (STEP_CONTROLLER_PERIOD_US*10^6) steps/second^2.
-// Min value is 1.
-// Max value is 400kHz
-// NOT THREAD-SAFE (stepper_status must be SS_STOPPED).
-stepper_error Stepper_SetAccSPS(int numStepper, int32_t value){
-  stepper_state * stepper = &steppers[numStepper];
-  if (stepper == NULL)
-    return SERR_STATENOTFOUND;
-  if (stepper->status & SS_STOPPED) {
-    stepper_error result = SERR_OK;
-    if (value > DEFAULT_MAX_SPS) {
-        stepper->accelerationSPS = DEFAULT_MAX_SPS;
-        result = SERR_LIMIT;
-    }
-    else if (value < DEFAULT_MIN_SPS) {
-        stepper->accelerationSPS = DEFAULT_MIN_SPS;
-        result = SERR_LIMIT;
-    } else {
-      stepper->accelerationSPS = value;
-    }
-    Stepper_SaveConfig();
-    return result;
-  }
-  return SERR_MUSTBESTOPPED;
-}
-
-// Sets the acceleration prescaler (the divider AccSPS).
-// Min value is 1.
-// NOT THREAD-SAFE (stepper_status must be SS_STOPPED).
-stepper_error Stepper_SetAccPrescaler(int numStepper, int32_t value){
-  stepper_state * stepper = &steppers[numStepper];
-  if (stepper == NULL)
-    return SERR_STATENOTFOUND;
-  if (stepper->status & SS_STOPPED) {
-    stepper->stepCtrlPrescaller = (value < 1) ? 1 : value;
-    Stepper_SaveConfig();
-    return  (value < 1) ? SERR_LIMIT : SERR_OK;
-  }
-  return SERR_MUSTBESTOPPED;
-}
-
-
-// Sets the new target position (step number) of the motor (where it should rotate to).
-// THREAD-SAFE (may be called at any time)
-int32_t Stepper_GetTargetPosition(int numStepper){
-  stepper_state * stepper = &steppers[numStepper];
-  return  (stepper == NULL) ? 0 : stepper->targetPosition;
-}
-
-// Gets the current possion of the stepper (step number).
-// THREAD-SAFE (may be called at any time)
-int32_t Stepper_GetCurrentPosition(int numStepper){
-  stepper_state * stepper = &steppers[numStepper];
-  return  (stepper == NULL) ? 0 : stepper->currentPosition;
-}
-
-// Gets the minimum stepper speed (steps-per-second).
-// THREAD-SAFE (may be called at any time)
-int32_t Stepper_GetMinSPS(int numStepper){
-  stepper_state * stepper = &steppers[numStepper];
-  return  (stepper == NULL) ? 0 : stepper->minSPS;
-}
-
-// Gets the maximum stepper speed (steps-per-second).
-// THREAD-SAFE (may be called at any time)
-int32_t Stepper_GetMaxSPS(int numStepper){
-  stepper_state * stepper = &steppers[numStepper];
-  return  (stepper == NULL) ? 0 : stepper->maxSPS;
-}
-
-// Gets the current stepper speed (steps-per-second).
-// THREAD-SAFE (may be called at any time)
-int32_t Stepper_GetCurrentSPS(int numStepper){
-  stepper_state * stepper = &steppers[numStepper];
-  return  (stepper == NULL) ? 0 : stepper->currentSPS;
-}
-
-// Gets the acceleration, as factor of (STEP_CONTROLLER_PERIOD_US*10^6) steps/second^2.
-// THREAD-SAFE (may be called at any time)
-int32_t Stepper_GetAccSPS(int numStepper){
-  stepper_state * stepper = &steppers[numStepper];
-  return  (stepper == NULL) ? 0 : stepper->accelerationSPS;
-}
-
-// Gets the acceleration prescaler (the divider AccSPS).
-// THREAD-SAFE (may be called at any time)
-int32_t Stepper_GetAccPrescaler(int numStepper) {
-  stepper_state * stepper = &steppers[numStepper];
-  return  (stepper == NULL) ? 0 : stepper->stepCtrlPrescaller;
-}
-
-// Gets the current status of the stepper (if any)
-// THREAD-SAFE (may be called at any time)
-stepper_status Stepper_GetStatus(int numStepper) {
-  stepper_state * stepper = &steppers[numStepper];
-  return (stepper == NULL) ? SS_UNDEFINED : stepper->status;
-}
-
-//Setup variable to use in stepper
-//stepper_error Stepper_Setup(int num, TIM_HandleTypeDef * stepTimer, uint32_t stepChannel, GPIO_TypeDef * dirGPIO, uint16_t dirPIN, stepper_mode mode){
-//	stepper_state * stepper = &steppers[num];
-//	stepper->number = num;
-//	stepper->STEP_TIMER = stepTimer;
-//	stepper->STEP_CHANNEL = stepChannel;
-//	stepper->DIR_GPIO = dirGPIO;
-//	stepper->DIR_PIN = dirPIN;
-//	stepper->modeStepper = mode;
-//	return SERR_OK;
-//}
-//
-//stepper_error Stepper_SetMaxMinPosition(int num, int32_t minPos, int32_t maxPos){
-//	stepper_state * stepper = &steppers[num];
-//	stepper->minPosition = minPos;
-//	stepper->maxPosition = maxPos;
-//	return SERR_OK;
-//}
-//
 //void Stepper_updateAcceleration(stepper_state * stepper){
 //	float fAccSPS = 0.8f * STEP_CONTROLLER_PERIOD_US * stepper->minSpeed / 1000000.0f;
 //	if (fAccSPS > 10.0f) {
@@ -573,32 +165,46 @@ stepper_status Stepper_GetStatus(int numStepper) {
 //    return ((int64_t)stepper->targetPosition - (int64_t)stepper->currentPosition) * GetStepDirectionUnit(stepper);
 //}
 //
-//void Stepper_updateScalar(stepper_state * stepper){
-//	switch (stepper->status & ~(SS_BREAKING|SS_BREAKCORRECTION)){
-//		case SS_STARTING:
-//			if (stepper->currentPosition > stepper->targetPosition){
-//				stepper->status = SS_RUNNING_BACKWARD;
-//				stepper->DIR_GPIO->BSRR = (uint32_t)stepper->DIR_PIN << 16u; //BSRR change pin to set/reset
-//			} else if (stepper->currentPosition < stepper->targetPosition){
-//				stepper->status = SS_RUNNING_FORWARD;
-//				stepper->DIR_GPIO->BSRR = stepper->DIR_PIN;
-//			} else if (stepper->currentPosition == stepper->targetPosition) {
-//				stepper->status = SS_STOPPED;
-//				HAL_TIM_PWM_Stop(stepper->STEP_TIMER, stepper->STEP_CHANNEL);
-//			}
-//			break;
-//		case SS_RUNNING_FORWARD:
-//		case SS_RUNNING_BACKWARD:
-//		// The actual pulse has been generated by previous timer run.
-//			stepper->currentPosition += GetStepDirectionUnit(stepper);
-//			{
-//			if (GetStepsToTarget(stepper) <= 0 && stepper -> currentSpeed == stepper -> minSpeed) {
-//			// We reached or passed through our target position at the stopping speed
-//				stepper->status = SS_STOPPED;
-//				HAL_TIM_PWM_Stop(stepper->STEP_TIMER, stepper->STEP_CHANNEL);
-//			//	printf("%c.stop:%d\r\n", stepper->number, stepper->currentPosition);
-//			}}
-//			break;
+//void Stepper_updateDirection(stepper_state * stepper){
+////	stepper_state * stepper = &steppers[num];
+//	if(stepper->currentPosition < stepper->targetPosition){
+//		stepper->status = SS_RUNNING_FORWARD;
+//		stepper->DIR_GPIO->BSRR = (uint32_t)stepper->DIR_PIN << 16u; //BSRR change pin to set/reset
+//		stepper->currentPosition += GetStepDirectionUnit(stepper);
+//	}
+//	else if (stepper->currentPosition > stepper->targetPosition) {
+//		stepper->status = SS_RUNNING_BACKWARD;
+//		stepper->DIR_GPIO->BSRR = stepper->DIR_PIN;
+//		stepper->currentPosition += GetStepDirectionUnit(stepper);
+//	}
+//	else if (stepper->currentPosition == stepper->targetPosition) {
+//		stepper->status = SS_STOPPED;
+//		HAL_TIM_PWM_Stop(stepper->STEP_TIMER, stepper->STEP_CHANNEL);
+//	}
+//	if (GetStepsToTarget(stepper) <= 0 && stepper -> currentSpeed == stepper -> minSpeed) {
+//		// We reached or passed through our target position at the stopping speed
+//		stepper->status = SS_STOPPED;
+//		HAL_TIM_PWM_Stop(stepper->STEP_TIMER, stepper->STEP_CHANNEL);
+//		//	printf("%c.stop:%d\r\n", stepper->number, stepper->currentPosition);
+//	}
+//}
+//
+//void Stepper_AllRunStepper(void){
+//	Stepper_runStepper(1);
+//	Stepper_runStepper(2);
+//	Stepper_runStepper(3);
+//}
+//
+//void Stepper_runStepper(stepper_state * stepper){
+//	stepper_status status = stepper -> status;
+//	if(status & SS_STOPPED){
+//		if(stepper->targetPosition != stepper->currentPosition){
+//			stepper->status = SS_STARTING;
+//			HAL_TIM_PWM_Start(stepper->STEP_TIMER, stepper->STEP_CHANNEL);
+//		}
+//	}
+//	if(status & SS_STARTING){
+//		Stepper_updateDirection(stepper);
 //	}
 //}
 //
@@ -606,13 +212,15 @@ stepper_status Stepper_GetStatus(int numStepper) {
 //
 //}
 //
-//void Stepper_updatePulse(stepper_state * stepper){
-//	if(stepper->modeStepper == M_ANGLE){
-//		Stepper_updateAngle(stepper);
-//	}
-//	else if (stepper->modeStepper == M_SCALAR) {
-//		Stepper_updateScalar(stepper);
-//	}
+//void Stepper_updatePulse(int num){
+//	stepper_state * stepper = &steppers[num];
+//	Stepper_runStepper(stepper);
+////	if(stepper->modeStepper == M_ANGLE){
+////		Stepper_updateAngle(stepper);
+////	}
+////	else if (stepper->modeStepper == M_SCALAR) {
+//////		Stepper_updateScalar(stepper);
+////	}
 //
 //}
 //
@@ -622,6 +230,8 @@ stepper_status Stepper_GetStatus(int numStepper) {
 //		return SERR_STATENOTFOUND;
 //	if(stepper->minPosition <= value && value <= stepper->maxPosition){
 //		stepper->targetPosition = value;
+//		stepper->status = SS_STARTING;
+//		Stepper_updatePulse(1);
 //	}
 //	else{
 //		stepper->status = SS_STOPPED;
@@ -629,6 +239,7 @@ stepper_status Stepper_GetStatus(int numStepper) {
 //		return SERR_LIMIT;
 //	}
 //	return SERR_OK;
+//
 //}
 
 	  //Ft = Fc/(Prescale+1)

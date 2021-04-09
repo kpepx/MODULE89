@@ -174,13 +174,19 @@ int main(void)
   STEP_TIMER_CLOCK = HAL_RCC_GetHCLKFreq();
   STEP_CONTROLLER_PERIOD_US =  1000000U /(HAL_RCC_GetHCLKFreq() / htim5.Init.Period);
 
-  Stepper_SetupPeripherals(1, &htim12, TIM_CHANNEL_2, DIR1_GPIO_Port, DIR1_Pin);
-  Stepper_SetupPeripherals(2, &htim13, TIM_CHANNEL_1, DIR2_GPIO_Port, DIR2_Pin);
-  Stepper_SetupPeripherals(3, &htim16, TIM_CHANNEL_1, DIR3_GPIO_Port, DIR3_Pin);
-
-  Stepper_InitDefaultState(1);
-  Stepper_InitDefaultState(2);
-  Stepper_InitDefaultState(3);
+  //htim12 DIR PF5
+  //htim13 DIR PF4
+  //htim16 DIR PE8
+  //htim17 DIR PF10
+  Stepper_Setup(1, &htim12, TIM_CHANNEL_2, DIR1_GPIO_Port, DIR1_Pin, 0);
+  Stepper_SetMaxMinPosition(1, 0, 3000);
+  Stepper_Setup(2, &htim13, TIM_CHANNEL_1, DIR2_GPIO_Port, DIR2_Pin, 0);
+  Stepper_SetMaxMinPosition(2, 0, 3000);
+  Stepper_Setup(3, &htim16, TIM_CHANNEL_1, DIR3_GPIO_Port, DIR3_Pin, 1);
+  Stepper_SetMaxMinPosition(3, 0, 3000);
+  Stepper_DefaultState(1);
+  Stepper_DefaultState(2);
+  Stepper_DefaultState(3);
 
   __HAL_TIM_ENABLE_IT(&htim12, TIM_IT_UPDATE);
   __HAL_TIM_ENABLE_IT(&htim13, TIM_IT_UPDATE);
@@ -198,27 +204,20 @@ int main(void)
 //  HAL_TIM_PWM_Start(&htim12, TIM_CHANNEL_2);
 //  __HAL_TIM_SET_COMPARE(&htim12, TIM_CHANNEL_2, 25000);
 //  __HAL_TIM_SET_COUNTER(&htim12, 1000);
-  //htim12 DIR PF5
-  //htim13 DIR PF4
-  //htim16 DIR PE8
-  //htim17 DIR PF10
-//  Stepper_Setup(1, &htim12, TIM_CHANNEL_2, DIR1_GPIO_Port, DIR1_Pin, 0);
-//  Stepper_SetMaxMinPosition(1, 0, 3000);
-//  Stepper_Setup(2, &htim13, TIM_CHANNEL_1, DIR2_GPIO_Port, DIR2_Pin, M_SCALAR);
-//  Stepper_Setup(3, &htim16, TIM_CHANNEL_1, DIR3_GPIO_Port, DIR3_Pin, M_SCALAR);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  Stepper_SetTargetPosition(1, 10);
+//	  Stepper_SetTargetPosition(1, 2000);
 
-
-//	  HAL_GPIO_WritePin(DIR1_GPIO_Port, DIR1_Pin, GPIO_PIN_SET);//Clock wise rotation
-//	  htim12.Instance -> PSC = 1;
-//	  htim12.Instance -> ARR = 10000;
-//	  __HAL_TIM_SET_COMPARE(&htim12, TIM_CHANNEL_2, 5000);
+	  HAL_TIM_PWM_Start(&htim12, TIM_CHANNEL_2);
+	  HAL_GPIO_WritePin(DIR1_GPIO_Port, DIR1_Pin, GPIO_PIN_SET);//Clock wise rotation
+	  htim12.Instance -> PSC = 0;
+	  htim12.Instance -> ARR = 62500;
+	  __HAL_TIM_SET_COMPARE(&htim12, TIM_CHANNEL_2, 31250);
 //	  b = htim12.Init.Period;
 //
     /* USER CODE END WHILE */
@@ -701,9 +700,9 @@ static void MX_TIM12_Init(void)
 
   /* USER CODE END TIM12_Init 1 */
   htim12.Instance = TIM12;
-  htim12.Init.Prescaler = 1;
+  htim12.Init.Prescaler = 0;
   htim12.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim12.Init.Period = 50000;
+  htim12.Init.Period = 62500;
   htim12.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim12.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_Base_Init(&htim12) != HAL_OK)
@@ -720,7 +719,7 @@ static void MX_TIM12_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 25000;
+  sConfigOC.Pulse = 31250;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim12, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
@@ -752,9 +751,9 @@ static void MX_TIM13_Init(void)
 
   /* USER CODE END TIM13_Init 1 */
   htim13.Instance = TIM13;
-  htim13.Init.Prescaler = 99;
+  htim13.Init.Prescaler = 0;
   htim13.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim13.Init.Period = 50000;
+  htim13.Init.Period = 62500;
   htim13.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim13.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
   if (HAL_TIM_Base_Init(&htim13) != HAL_OK)
@@ -766,7 +765,7 @@ static void MX_TIM13_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 25000;
+  sConfigOC.Pulse = 31250;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim13, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
@@ -799,9 +798,9 @@ static void MX_TIM16_Init(void)
 
   /* USER CODE END TIM16_Init 1 */
   htim16.Instance = TIM16;
-  htim16.Init.Prescaler = 99;
+  htim16.Init.Prescaler = 0;
   htim16.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim16.Init.Period = 50000;
+  htim16.Init.Period = 62500;
   htim16.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim16.Init.RepetitionCounter = 0;
   htim16.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
@@ -814,7 +813,7 @@ static void MX_TIM16_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 25000;
+  sConfigOC.Pulse = 31250;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
@@ -862,9 +861,9 @@ static void MX_TIM17_Init(void)
 
   /* USER CODE END TIM17_Init 1 */
   htim17.Instance = TIM17;
-  htim17.Init.Prescaler = 99;
+  htim17.Init.Prescaler = 0;
   htim17.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim17.Init.Period = 50000;
+  htim17.Init.Period = 62500;
   htim17.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim17.Init.RepetitionCounter = 0;
   htim17.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
@@ -877,7 +876,7 @@ static void MX_TIM17_Init(void)
     Error_Handler();
   }
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = 25000;
+  sConfigOC.Pulse = 31250;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
   sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
   sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
@@ -1180,53 +1179,48 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
-	if(htim == &htim5){
-		if (__HAL_TIM_GET_FLAG(&htim5, TIM_FLAG_UPDATE))
-		  {
-		    if (__HAL_TIM_GET_ITSTATUS(&htim5, TIM_IT_UPDATE))
-		    {
-//		      HAL_GPIO_WritePin(GPIOA, LED_Pin, GPIO_PIN_SET);
-		      __HAL_TIM_CLEAR_FLAG(&htim5, TIM_FLAG_UPDATE);
-
-		      Stepper_ExecuteAllControllers();
-
-//		      HAL_GPIO_WritePin(GPIOA, LED_Pin, GPIO_PIN_RESET);
-		    }
-		  }
-	}
-	if(htim==&htim12){
-		if (__HAL_TIM_GET_FLAG(&htim12, TIM_FLAG_UPDATE))
-		  {
-		    if (__HAL_TIM_GET_ITSTATUS(&htim12, TIM_IT_UPDATE))
-		    {
-		      __HAL_TIM_CLEAR_FLAG(&htim12, TIM_FLAG_UPDATE);
-		      Stepper_PulseTimerUpdate(1);
-		    }
-		  }
-	}
-	if (htim == &htim13){
-		if (__HAL_TIM_GET_FLAG(&htim13, TIM_FLAG_UPDATE))
-		  {
-		    if (__HAL_TIM_GET_ITSTATUS(&htim13, TIM_IT_UPDATE))
-		    {
-		      __HAL_TIM_CLEAR_FLAG(&htim13, TIM_FLAG_UPDATE);
-		      Stepper_PulseTimerUpdate(2);
-		    }
-		  }
-	}
-	if (htim == &htim16) {
-		if (__HAL_TIM_GET_FLAG(&htim16, TIM_FLAG_UPDATE))
-		  {
-		    if (__HAL_TIM_GET_ITSTATUS(&htim16, TIM_IT_UPDATE))
-		    {
-		      __HAL_TIM_CLEAR_FLAG(&htim16, TIM_FLAG_UPDATE);
-		      Stepper_PulseTimerUpdate(3);
-		    }
-		  }
-	}
-}
+//void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+//	if(htim == &htim5){
+////		a+=1;
+////		Stepper_AllRunStepper();
+//	}
+//	else if(htim==&htim12){
+//		Stepper_updatePulse(1);
+////		b+=1;
+////		Stepper_updateDirection(1);
+//		if (__HAL_TIM_GET_FLAG(&htim12, TIM_FLAG_UPDATE))
+//		  {
+//		    if (__HAL_TIM_GET_ITSTATUS(&htim12, TIM_IT_UPDATE))
+//		    {
+//		      __HAL_TIM_CLEAR_FLAG(&htim12, TIM_FLAG_UPDATE);
+//		      b+=1;
+//		      Stepper_updateDirection(1);
+//		    }
+//		  }
+//	}
+//	else if (htim == &htim13){
+//		Stepper_updatePulse(2);
+//		if (__HAL_TIM_GET_FLAG(&htim13, TIM_FLAG_UPDATE))
+//		  {
+//		    if (__HAL_TIM_GET_ITSTATUS(&htim13, TIM_IT_UPDATE))
+//		    {
+//		      __HAL_TIM_CLEAR_FLAG(&htim13, TIM_FLAG_UPDATE);
+//		      Stepper_updateDirection(2);
+//		    }
+//		  }
+//	}
+//	else if (htim == &htim16) {
+//		Stepper_updatePulse(3);
+//		if (__HAL_TIM_GET_FLAG(&htim16, TIM_FLAG_UPDATE))
+//		  {
+//		    if (__HAL_TIM_GET_ITSTATUS(&htim16, TIM_IT_UPDATE))
+//		    {
+//		      __HAL_TIM_CLEAR_FLAG(&htim16, TIM_FLAG_UPDATE);
+//		      Stepper_updateDirection(3);
+//		    }
+//		  }
+//	}
+//}
 
 /* USER CODE END 4 */
 
