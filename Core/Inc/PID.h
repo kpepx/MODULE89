@@ -21,6 +21,8 @@ typedef struct{
 	//Set min-max speed
 	volatile float Vmax, Vmin;
 
+	volatile float output;
+
 	//Variable use in calculator function
 	volatile float error_pre, error, integral;
 }pid_state;

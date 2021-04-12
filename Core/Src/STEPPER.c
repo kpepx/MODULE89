@@ -6,6 +6,8 @@
 
 #include "STEPPER.h"
 #include "math.h"
+#include "QEI.h"
+#include "PID.h"
 
 static stepper_state steppers[NUM_STEPPER];
 
@@ -32,19 +34,19 @@ stepper_error Stepper_SetMaxMinPosition(int num, int32_t minPos, int32_t maxPos)
 //Update Frequency PWM and set duty 50%
 void Stepper_SetStepTimer(stepper_state * stepper){
   if (stepper -> STEP_TIMER != NULL && stepper -> STEP_TIMER -> Instance != NULL){
-    TIM_TypeDef * timer = stepper -> STEP_TIMER -> Instance;
-    uint32_t prescaler = 0;
-    uint32_t timerTicks = STEP_TIMER_CLOCK / stepper -> currentSpeed;
+//    TIM_TypeDef * timer = stepper -> STEP_TIMER -> Instance;
+//    uint32_t prescaler = 0;
+//    uint32_t timerTicks = STEP_TIMER_CLOCK / stepper -> currentSpeed;
+//
+//    if (timerTicks > 0xFFFF) {
+//        // calculate the minimum prescaler
+//        prescaler = timerTicks/0xFFFF;
+//        timerTicks /= (prescaler + 1);
+//    }
 
-    if (timerTicks > 0xFFFF) {
-        // calculate the minimum prescaler
-        prescaler = timerTicks/0xFFFF;
-        timerTicks /= (prescaler + 1);
-    }
-
-    timer -> PSC = prescaler;
-    timer -> ARR = timerTicks;
-    __HAL_TIM_SET_COMPARE(stepper->STEP_TIMER, stepper->STEP_CHANNEL, timerTicks/2);
+//    timer -> PSC = prescaler;
+//    timer -> ARR = timerTicks;
+    __HAL_TIM_SET_COMPARE(stepper->STEP_TIMER, stepper->STEP_CHANNEL, stepper -> currentSpeed/2);
   }
 }
 
@@ -66,8 +68,63 @@ stepper_error Stepper_DefaultState(int num){
 	stepper -> currentPosition = 0;
 
 	Stepper_SetStepTimer(stepper);
+	HAL_TIM_PWM_Start(stepper->STEP_TIMER, stepper->STEP_CHANNEL);
 
 	return SERR_OK;
+}
+
+stepper_error Stepper_setTraget(int num, int value){
+	stepper_state * stepper = &steppers[num];
+	if (stepper == NULL)
+		return SERR_STATENOTFOUND;
+	if(stepper->status != SS_STOPPED){
+		stepper->targetPosition = value;
+		stepper->status = SS_STARTING;
+	}
+	else{
+		stepper->status = SS_STOPPED;
+		HAL_TIM_PWM_Stop(stepper->STEP_TIMER, stepper->STEP_CHANNEL);
+		return SERR_LIMIT;
+	}
+	return SERR_OK;
+}
+
+stepper_error Stepper_SetSpeed(int num, int32_t value){
+	stepper_state * stepper = &steppers[num];
+	if(value<stepper->minSpeed){
+		stepper->currentSpeed = stepper->minSpeed;
+	}
+	else if (value>stepper->maxSpeed) {
+		stepper->currentSpeed = stepper->maxSpeed;
+	}
+	else{
+		stepper->currentSpeed = value;
+	}
+}
+
+void Stepper_Direction(stepper_state * stepper){
+	int32_t input = calculator(stepper->number, Get_Value_Encoder(stepper->number), stepper->targetPosition);
+	Stepper_SetSpeed(stepper->number, abs(input));
+	if(input<0){
+		stepper->status = SS_RUNNING_FORWARD;
+		stepper->DIR_GPIO->BSRR = (uint32_t)stepper->DIR_PIN << (16U); //BSRR change pin to set/reset
+	}
+	else {
+		stepper->status = SS_RUNNING_BACKWARD;
+		stepper->DIR_GPIO->BSRR = stepper->DIR_PIN; //BSRR change pin to set/reset
+	}
+}
+
+void Stepper_runStep(int num){
+	stepper_state * stepper = &steppers[num];
+	Stepper_Direction(stepper);
+	Stepper_SetStepTimer(stepper);
+	if(stepper->status != SS_STOPPED){
+		HAL_TIM_PWM_Start(stepper->STEP_TIMER, stepper->STEP_CHANNEL);
+	}
+	else{
+		HAL_TIM_PWM_Stop(stepper->STEP_TIMER, stepper->STEP_CHANNEL);
+	}
 }
 
 //void Stepper_updateAcceleration(stepper_state * stepper){
@@ -90,6 +147,7 @@ stepper_error Stepper_DefaultState(int num){
 //
 ////	    stepper->stepCtrlPrescallerTicks =
 //	    stepper->stepCtrlPrescaller = prescalerValue;
+
 //	    stepper -> acceleration = prescaledAcc;
 //
 //	    // Round up if at upper remainder

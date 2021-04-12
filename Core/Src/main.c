@@ -1,5 +1,9 @@
 /* USER CODE BEGIN Header */
 /**
+ * 	// File name: main.c
+	// Author: KRITTAPAK
+	// Project Name: Module8-9
+	// Group name: ISUS
   ******************************************************************************
   * @file           : main.c
   * @brief          : Main program body
@@ -92,7 +96,9 @@ PCD_HandleTypeDef hpcd_USB_OTG_FS;
 /* USER CODE BEGIN PV */
 uint32_t STEP_TIMER_CLOCK;
 uint32_t STEP_CONTROLLER_PERIOD_US;
-int a = 0;
+//uint32_t prescaler;
+//uint32_t timerTicks;
+uint32_t a = 0;
 int b = 0;
 /* USER CODE END PV */
 
@@ -178,6 +184,8 @@ int main(void)
   //htim13 DIR PF4
   //htim16 DIR PE8
   //htim17 DIR PF10
+
+  //Stepper Setup
   Stepper_Setup(1, &htim12, TIM_CHANNEL_2, DIR1_GPIO_Port, DIR1_Pin, 0);
   Stepper_SetMaxMinPosition(1, 0, 3000);
   Stepper_Setup(2, &htim13, TIM_CHANNEL_1, DIR2_GPIO_Port, DIR2_Pin, 0);
@@ -188,22 +196,22 @@ int main(void)
   Stepper_DefaultState(2);
   Stepper_DefaultState(3);
 
-  __HAL_TIM_ENABLE_IT(&htim12, TIM_IT_UPDATE);
-  __HAL_TIM_ENABLE_IT(&htim13, TIM_IT_UPDATE);
-  __HAL_TIM_ENABLE_IT(&htim16, TIM_IT_UPDATE);
+//  __HAL_TIM_ENABLE_IT(&htim12, TIM_IT_UPDATE);
+//  __HAL_TIM_ENABLE_IT(&htim13, TIM_IT_UPDATE);
+//  __HAL_TIM_ENABLE_IT(&htim16, TIM_IT_UPDATE);
 
   //Timer Interrupt Control
   HAL_TIM_Base_Start_IT(&htim5);
-//  setupPID(1, 10, 50, 150, 1, 2, 3);
-//  setupPID(2, 110, 510, 1150, 11, 12, 13);
-//  setupPID(3, 110, 510, 1510, 11, 21, 31);
-//  HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_ALL);
-//  Encoder_Start(1, &htim1, TIM_CHANNEL_ALL);
-//  Encoder_Start(2, &htim3, TIM_CHANNEL_ALL);
-//  Encoder_Start(3, &htim4, TIM_CHANNEL_ALL);
-//  HAL_TIM_PWM_Start(&htim12, TIM_CHANNEL_2);
-//  __HAL_TIM_SET_COMPARE(&htim12, TIM_CHANNEL_2, 25000);
-//  __HAL_TIM_SET_COUNTER(&htim12, 1000);
+
+  //PID Setup
+  setupPID(1, 0.001, -3600, 3600, 2, 0.01, 1.5);
+  setupPID(2, 0.001, -3600, 3600, 2, 0.01, 1.5);
+  setupPID(3, 0.001, -3600, 3600, 2, 0.01, 1.5);
+
+  //Encoder Setup
+  Encoder_Start(1, &htim1, TIM_CHANNEL_ALL);
+  Encoder_Start(2, &htim3, TIM_CHANNEL_ALL);
+  Encoder_Start(3, &htim4, TIM_CHANNEL_ALL);
 
   /* USER CODE END 2 */
 
@@ -211,15 +219,9 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-//	  Stepper_SetTargetPosition(1, 2000);
+//	  Stepper_setTraget(2, 2000);
+//	  Stepper_runStep(2);
 
-	  HAL_TIM_PWM_Start(&htim12, TIM_CHANNEL_2);
-	  HAL_GPIO_WritePin(DIR1_GPIO_Port, DIR1_Pin, GPIO_PIN_SET);//Clock wise rotation
-	  htim12.Instance -> PSC = 0;
-	  htim12.Instance -> ARR = 62500;
-	  __HAL_TIM_SET_COMPARE(&htim12, TIM_CHANNEL_2, 31250);
-//	  b = htim12.Init.Period;
-//
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -767,7 +769,7 @@ static void MX_TIM13_Init(void)
   sConfigOC.OCMode = TIM_OCMODE_PWM1;
   sConfigOC.Pulse = 31250;
   sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+  sConfigOC.OCFastMode = TIM_OCFAST_ENABLE;
   if (HAL_TIM_PWM_ConfigChannel(&htim13, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
   {
     Error_Handler();
@@ -1179,6 +1181,11 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+//void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+//	if(htim == &htim13){
+//		htim13.Instance->ARR = a;
+//	}
+//}
 //void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 //	if(htim == &htim5){
 ////		a+=1;

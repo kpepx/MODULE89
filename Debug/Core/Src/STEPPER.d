@@ -40,7 +40,8 @@ Core/Src/STEPPER.o: ../Core/Src/STEPPER.c ../Core/Inc/STEPPER.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_uart_ex.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pcd.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_usb.h \
- ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pcd_ex.h
+ ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pcd_ex.h \
+ ../Core/Inc/QEI.h ../Core/Inc/PID.h
 
 ../Core/Inc/STEPPER.h:
 
@@ -127,3 +128,7 @@ Core/Src/STEPPER.o: ../Core/Src/STEPPER.c ../Core/Inc/STEPPER.h \
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_usb.h:
 
 ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pcd_ex.h:
+
+../Core/Inc/QEI.h:
+
+../Core/Inc/PID.h:

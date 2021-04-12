@@ -41,16 +41,16 @@ float calculator(int num, int input, float setpoint){
 	float Dout = pid->Kd * derivative;
 
 	// Calculate total output
-	float output = Pout + Iout + Dout;
+	pid->output = Pout + Iout + Dout;
 
 	// Restrict to max/min
-	if( output > pid->Vmax){
-	     output = pid->Vmax;}
-	else if( output < pid->Vmin){
-	     output = pid->Vmin;}
+	if( pid->output > pid->Vmax){
+		pid->output = pid->Vmax;}
+	else if( pid->output < pid->Vmin){
+		pid->output = pid->Vmin;}
 
 	// Save error to previous error
 	pid->error_pre = pid->error;
 
-	return output;
+	return pid->output;
 }
