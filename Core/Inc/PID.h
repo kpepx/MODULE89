@@ -6,7 +6,7 @@
 #ifndef __PID_H
 #define __PID_H
 
-#define NUM_PID 4
+#define NUM_PID 5
 
 typedef struct{
 	//number

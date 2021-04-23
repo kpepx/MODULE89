@@ -30,11 +30,11 @@ float calculator(int num, int input, float setpoint){
 	// Integral term
 	pid->integral += pid->error * pid->Dt;
 	float Iout = pid->Ki * pid->integral;
-	if (pid->integral > 255) {
-		pid->integral = 255;
+	if (pid->integral > 4095) {
+		pid->integral = 4095;
 	}
-	if (pid->integral < -255) {
-		pid->integral = -255;
+	if (pid->integral < -4095) {
+		pid->integral = -4095;
 	}
 	// Derivative term
 	float derivative = (pid->error - pid->error_pre) / pid->Dt;

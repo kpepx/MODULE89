@@ -1,0 +1,12 @@
+Serial.c:11:6:Serial_Setup	24	static
+Serial.c:18:9:Cal_sum	24	static
+Serial.c:26:9:SHIFT_TO_LSB	16	static
+Serial.c:30:9:SHIFT_TO_MSB	16	static
+Serial.c:34:6:Servo_gripperChess	24	static
+Serial.c:45:6:Servo_tragetPos	24	static
+Serial.c:56:6:Servo_StartStop	24	static
+Serial.c:67:6:iRead	16	static
+Serial.c:80:6:iWrite	24	static
+Serial.c:96:6:sendIPacket	16	static
+Serial.c:105:6:data_in	24	static
+Serial.c:110:6:selectPacket	24	static

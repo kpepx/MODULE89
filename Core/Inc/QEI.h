@@ -8,7 +8,8 @@
 
 #include "stm32h7xx_hal.h"
 
-#define NUM_ENCODER 4
+#define NUM_ENCODER 5
+#define OFFSET 15000
 
 typedef struct{
 	int number;
@@ -22,6 +23,6 @@ typedef struct{
 void Encoder_Start(int num, TIM_HandleTypeDef * qeiTimer, uint32_t qeiChannel);
 
 //Get Value from Encoder
-int Get_Value_Encoder(int num);
+uint16_t Get_Value_Encoder(int num);
 
 #endif /* __QEI_H */

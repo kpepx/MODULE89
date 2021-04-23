@@ -1,2 +1,5 @@
-QEI.c:15:6:Encoder_Start	32	static
-QEI.c:23:5:Get_Value_Encoder	24	static
+QEI.c:15:6:enable_Encoder_OE	8	static
+QEI.c:19:6:disable_Encoder_OE	8	static
+QEI.c:23:6:Encoder_Start	32	static
+QEI.c:33:10:Get_Value_Encoder	24	static
+QEI.c:40:6:Set_Encoder_Zero	24	static

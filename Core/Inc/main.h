@@ -70,12 +70,8 @@ void Error_Handler(void);
 #define Gripper_RX_GPIO_Port GPIOF
 #define Gripper_TX_Pin GPIO_PIN_7
 #define Gripper_TX_GPIO_Port GPIOF
-#define Current_3_Pin GPIO_PIN_8
-#define Current_3_GPIO_Port GPIOF
 #define DIR4_Pin GPIO_PIN_10
 #define DIR4_GPIO_Port GPIOF
-#define Current_1_Pin GPIO_PIN_2
-#define Current_1_GPIO_Port GPIOC
 #define Current_2_Pin GPIO_PIN_3
 #define Current_2_GPIO_Port GPIOC
 #define QEI4A_Pin GPIO_PIN_5
@@ -90,6 +86,10 @@ void Error_Handler(void);
 #define QEI1A_GPIO_Port GPIOE
 #define QEI1B_Pin GPIO_PIN_11
 #define QEI1B_GPIO_Port GPIOE
+#define OE_ENCODER_Pin GPIO_PIN_10
+#define OE_ENCODER_GPIO_Port GPIOB
+#define OE_STEPPER_Pin GPIO_PIN_11
+#define OE_STEPPER_GPIO_Port GPIOB
 #define PC_RX_Pin GPIO_PIN_12
 #define PC_RX_GPIO_Port GPIOB
 #define LD3_Pin GPIO_PIN_14

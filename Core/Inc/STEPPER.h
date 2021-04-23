@@ -9,9 +9,14 @@
 
 #include "stm32h7xx_hal.h"
 
-#define NUM_STEPPER 4
+#define NUM_STEPPER 5
 #define DEFAULT_MIN_SPEED 1
 #define DEFAULT_MAX_SPEED 400000
+#define ANGLE_TO_ENCODER 8192/36000
+#define SCALAR_TO_ENCODER 8192/100
+#define OFFSET 15000
+
+//int AllHome_status = 0;
 
 typedef enum {
     SS_UNDEFINED         = 0x00,
@@ -25,7 +30,7 @@ typedef enum {
 
 typedef enum {
     M_ANGLE         = 0x00,
-    M_SCALAR	    = 0x01
+    M_SCALAR	    = 0x01,
 } stepper_mode;
 
 typedef enum {
@@ -80,6 +85,8 @@ typedef struct{
 
 	volatile stepper_mode modeStepper;
 
+	volatile int8_t home_status;
+
 
 }stepper_state;
 
@@ -87,9 +94,33 @@ extern uint32_t STEP_TIMER_CLOCK;
 extern uint32_t STEP_CONTROLLER_PERIOD_US;
 
 stepper_error setupStepper(int num, TIM_HandleTypeDef * stepTimer, uint32_t stepChannel, GPIO_TypeDef * dirGPIO, uint16_t dirPIN, stepper_mode mode);
-void Stepper_updateAngle(stepper_state * stepper);
-void Stepper_updatePulse(int num);
-void Stepper_updateDirection(stepper_state * stepper);
-stepper_error Stepper_SetTargetPosition(int num, int32_t value);
+
+void Stepper_SetStepTimer(stepper_state * stepper);
+
+stepper_error Stepper_DefaultState(int num);
+
+stepper_error Stepper_SetMinPosition(int num, uint16_t value);
+
+stepper_error Stepper_SetMaxPosition(int num, uint16_t value);
+
+stepper_error Stepper_SetMinSpeed(int num, uint16_t value);
+
+stepper_error Stepper_SetMaxSpeed(int num, uint16_t value);
+
+stepper_error Stepper_SetTraget(int num, uint16_t value);
+
+stepper_error Stepper_SetSpeed(int num, int32_t value);
+
+void Stepper_Direction(stepper_state * stepper);
+
+void enable_Stepper_OE();
+
+void disable_Stepper_OE();
+
+void Stepper_runStep(int num);
+
+void Stepper_StartStop(int num, uint8_t j);
+
+void Stepper_updateHome(int num, int value);
 
 #endif /* __STEPPER_H */
