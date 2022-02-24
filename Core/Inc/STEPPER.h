@@ -9,12 +9,12 @@
 
 #include "stm32h7xx_hal.h"
 
-#define NUM_STEPPER 5
+#define NUM_STEPPER 5 // amount motor to used
 #define DEFAULT_MIN_SPEED 1
 #define DEFAULT_MAX_SPEED 400000
-#define ANGLE_TO_ENCODER 8192/36000
-#define SCALAR_TO_ENCODER 8192/100
-#define OFFSET 15000
+#define ANGLE_TO_ENCODER 8192/36000 //8192 from encoder mode PPR x 4, 36000 from 360.00 * 100 degrees
+#define SCALAR_TO_ENCODER 8192/100 //100 measure mm
+#define OFFSET 15000 // offset count encoder
 
 //int AllHome_status = 0;
 

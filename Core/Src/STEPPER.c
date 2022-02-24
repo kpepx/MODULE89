@@ -142,7 +142,7 @@ void Stepper_runStep(int num){
 		if(stepper->home_status){
 			Stepper_Direction(stepper);
 			Stepper_SetStepTimer(stepper);
-			//			HAL_TIM_PWM_Start(stepper->STEP_TIMER, stepper->STEP_CHANNEL);
+			//HAL_TIM_PWM_Start(stepper->STEP_TIMER, stepper->STEP_CHANNEL);
 		}
 		else {
 

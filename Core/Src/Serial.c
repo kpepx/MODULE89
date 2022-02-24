@@ -5,6 +5,7 @@
 
 #include "Serial.h"
 #include "STEPPER.h"
+#include "CARTESIAN.h"
 
 serial_state Serials[NUM_SERIAL];
 
@@ -167,6 +168,7 @@ void selectPacket(int num){
 						Servo_tragetPos(2, (serial->rPacket[12]<<8) + serial->rPacket[11]);
 						break;
 					case XYZ_MOVE:
+						updateJoint((serial->rPacket[6]<<8) + serial->rPacket[5], (serial->rPacket[8]<<8) + serial->rPacket[7], (serial->rPacket[10]<<8) + serial->rPacket[9]);
 						break;
 					case GRIP_CHESS:
 						Servo_gripperChess(2, (serial->rPacket[12]<<8) + serial->rPacket[11]);
