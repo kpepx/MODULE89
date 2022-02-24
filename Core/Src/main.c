@@ -27,7 +27,12 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "arm_math.h"
 
+#include "QEI.h"
+#include "PID.h"
+#include "STEPPER.h"
+#include "Serial.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -41,10 +46,7 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-#include "QEI.h"
-#include "PID.h"
-#include "STEPPER.h"
-#include "Serial.h"
+
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -225,7 +227,7 @@ int main(void)
   Encoder_Start(3, &htim4, TIM_CHANNEL_ALL);
   Encoder_Start(4, &htim2, TIM_CHANNEL_ALL);
 
-  // Uart
+  //Uart
   Serial_Setup(1, &huart5);
   Serial_Setup(2, &huart7);
 
