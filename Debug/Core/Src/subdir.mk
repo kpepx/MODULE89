@@ -5,6 +5,8 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../Core/Src/CARTESIAN.c \
+../Core/Src/CHESS.c \
 ../Core/Src/PID.c \
 ../Core/Src/QEI.c \
 ../Core/Src/STEPPER.c \
@@ -18,6 +20,8 @@ C_SRCS += \
 ../Core/Src/system_stm32h7xx.c 
 
 OBJS += \
+./Core/Src/CARTESIAN.o \
+./Core/Src/CHESS.o \
 ./Core/Src/PID.o \
 ./Core/Src/QEI.o \
 ./Core/Src/STEPPER.o \
@@ -31,6 +35,8 @@ OBJS += \
 ./Core/Src/system_stm32h7xx.o 
 
 C_DEPS += \
+./Core/Src/CARTESIAN.d \
+./Core/Src/CHESS.d \
 ./Core/Src/PID.d \
 ./Core/Src/QEI.d \
 ./Core/Src/STEPPER.d \

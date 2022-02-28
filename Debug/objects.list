@@ -1,3 +1,5 @@
+"./Core/Src/CARTESIAN.o"
+"./Core/Src/CHESS.o"
 "./Core/Src/PID.o"
 "./Core/Src/QEI.o"
 "./Core/Src/STEPPER.o"
