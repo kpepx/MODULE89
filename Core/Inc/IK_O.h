@@ -2,14 +2,14 @@
  * Academic License - for use in teaching, academic research, and meeting
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
- * File: trajectory.h
+ * File: IK.h
  *
  * MATLAB Coder version            : 5.1
- * C/C++ source code generated on  : 27-Feb-2022 23:16:03
+ * C/C++ source code generated on  : 12-Feb-2022 14:54:53
  */
 
-#ifndef TRAJECTORY_H
-#define TRAJECTORY_H
+#ifndef IK_H
+#define IK_H
 
 /* Include Files */
 #include "rtwtypes.h"
@@ -22,8 +22,8 @@ extern "C" {
 #endif
 
   /* Function Declarations */
-  extern void trajectory(const double qall[6], double Tk, double call[6], double
-    *pos, double *vel, double *acc);
+  extern void IK(const double pos[3], double oriz, double gram, double qi[4],
+                 double *check);
 
 #ifdef __cplusplus
 
@@ -32,7 +32,7 @@ extern "C" {
 #endif
 
 /*
- * File trailer for trajectory.h
+ * File trailer for IK.h
  *
  * [EOF]
  */
