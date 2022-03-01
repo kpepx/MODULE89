@@ -12,7 +12,7 @@
 #define FORWARDKINEMATIC_H
 
 /* Include Files */
-#include "rtwtypes.h"
+//#include "rtwtypes.h"
 #include <stddef.h>
 #include <stdlib.h>
 #ifdef __cplusplus

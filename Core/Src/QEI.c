@@ -30,7 +30,7 @@ void Encoder_Start(int num, TIM_HandleTypeDef * qeiTimer, uint32_t qeiChannel){ 
 	Set_Encoder_Zero(num);
 }
 
-uint16_t Get_Value_Encoder(int num){ //Read Encoder Select by input num
+uint32_t Get_Value_Encoder(int num){ //Read Encoder Select by input num
 	encoder_state * encoder = &encoders[num];
 	if(__HAL_TIM_GET_COUNTER(encoder->QEI_TIMER) >= 0){
 		return __HAL_TIM_GET_COUNTER(encoder->QEI_TIMER); //return value to use

@@ -1,0 +1,5 @@
+cartesianJog.c:25:6:cartesianJog	80	static
+cartesianJog.c:46:8:get_cartesian_q1	16	static
+cartesianJog.c:51:8:get_cartesian_q2	16	static
+cartesianJog.c:56:8:get_cartesian_q3	16	static
+cartesianJog.c:61:8:get_cartesian_q4	16	static

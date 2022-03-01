@@ -192,14 +192,14 @@ int main(void)
 
   //Stepper Setup
   Stepper_Setup(1, &htim16, TIM_CHANNEL_1, DIR1_GPIO_Port, DIR1_Pin, 0);
-  Stepper_SetMinPosition(1, 0);
-  Stepper_SetMaxPosition(1, 36000);
+  Stepper_SetMinPosition(1, 0.0);
+  Stepper_SetMaxPosition(1, 360.00);
   Stepper_Setup(2, &htim17, TIM_CHANNEL_1, DIR2_GPIO_Port, DIR2_Pin, 0);
-  Stepper_SetMinPosition(2, 0);
-  Stepper_SetMaxPosition(2, 36000);
+  Stepper_SetMinPosition(2, 0.0);
+  Stepper_SetMaxPosition(2, 360.00);
   Stepper_Setup(3, &htim13, TIM_CHANNEL_1, DIR3_GPIO_Port, DIR3_Pin, 1);
-  Stepper_SetMinPosition(3, 0);
-  Stepper_SetMaxPosition(3, 36000);
+  Stepper_SetMinPosition(3, 0.0);
+  Stepper_SetMaxPosition(3, 150.00);
   Stepper_Setup(4, &htim12, TIM_CHANNEL_2, DIR4_GPIO_Port, DIR4_Pin, 1);
   Stepper_SetMinPosition(4, 0);
   Stepper_SetMaxPosition(4, 36000);
@@ -231,6 +231,9 @@ int main(void)
   Serial_Setup(1, &huart5);
   Serial_Setup(2, &huart7);
 
+  Stepper_updateHome(1, 1);
+  Stepper_updateHome(2, 1);
+  Stepper_updateHome(3, 1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -238,6 +241,10 @@ int main(void)
   while (1)
   {
 //	  a = HAL_GPIO_ReadPin(PROXIMITY2_GPIO_Port, PROXIMITY2_Pin);
+	  Stepper_runStep(1);
+	  Stepper_runStep(2);
+	  Stepper_runStep(3);
+	  Stepper_runStep(4);
 	  if(state){
 		  Stepper_runStep(1);
 		  Stepper_runStep(2);

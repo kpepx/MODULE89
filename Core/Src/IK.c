@@ -10,56 +10,11 @@
 
 /* Include Files */
 #include "IK.h"
-#include "rt_nonfinite.h"
-#include "rt_defines.h"
-#include "rt_nonfinite.h"
+//#include "rt_nonfinite.h"
+//#include "rt_defines.h"
+//#include "rt_nonfinite.h"
 #include <math.h>
 #include <stdio.h>
-
-/* Function Declarations */
-static double rt_atan2d_snf(double u0, double u1);
-
-/* Function Definitions */
-/*
- * Arguments    : double u0
- *                double u1
- * Return Type  : double
- */
-static double rt_atan2d_snf(double u0, double u1)
-{
-  double y;
-  int b_u0;
-  int b_u1;
-  if (rtIsNaN(u0) || rtIsNaN(u1)) {
-    y = rtNaN;
-  } else if (rtIsInf(u0) && rtIsInf(u1)) {
-    if (u0 > 0.0) {
-      b_u0 = 1;
-    } else {
-      b_u0 = -1;
-    }
-
-    if (u1 > 0.0) {
-      b_u1 = 1;
-    } else {
-      b_u1 = -1;
-    }
-
-    y = atan2(b_u0, b_u1);
-  } else if (u1 == 0.0) {
-    if (u0 > 0.0) {
-      y = RT_PI / 2.0;
-    } else if (u0 < 0.0) {
-      y = -(RT_PI / 2.0);
-    } else {
-      y = 0.0;
-    }
-  } else {
-    y = atan2(u0, u1);
-  }
-
-  return y;
-}
 
 /*
  * Arguments    : const double pos[3]
@@ -69,8 +24,10 @@ static double rt_atan2d_snf(double u0, double u1)
  *                double *check
  * Return Type  : void
  */
-void IK(const double pos[3], double oriz, double gram, double qi[4], double
-        *check)
+
+static ik_state iks[NUM_IK];
+
+void IK(const double pos[3], double oriz, double gram, double qi[4], double *check)
 {
   double c2;
   double q2;
@@ -85,9 +42,9 @@ void IK(const double pos[3], double oriz, double gram, double qi[4], double
   if (s2 >= 0.0) {
     *check = 1.0;
     s2 = gram * sqrt(s2);
-    q2 = rt_atan2d_snf(s2, c2);
+    q2 = atan2(s2, c2);
     qi[1] = q2;
-    s2 = rt_atan2d_snf(pos[1], pos[0]) - rt_atan2d_snf(412.75 * s2, 412.75 * c2
+    s2 = atan2(pos[1], pos[0]) - atan2(412.75 * s2, 412.75 * c2
       + 248.0);
     qi[0] = s2;
     qi[2] = 249.25 - pos[2];

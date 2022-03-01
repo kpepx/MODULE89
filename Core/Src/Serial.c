@@ -162,15 +162,16 @@ void selectPacket(int num){
 						Servo_StartStop(2, (serial->rPacket[12]<<8) + serial->rPacket[11]);
 						break;
 					case JOINT_MOVE:
-						Stepper_SetTraget(1, (serial->rPacket[6]<<8) + serial->rPacket[5]);
-						Stepper_SetTraget(2, (serial->rPacket[8]<<8) + serial->rPacket[7]);
-						Stepper_SetTraget(3, (serial->rPacket[10]<<8) + serial->rPacket[9]);
+						Stepper_SetTraget(1, ((float_t)(serial->rPacket[6]<<8) + serial->rPacket[5])/100.00);
+						Stepper_SetTraget(2, ((float_t)(serial->rPacket[8]<<8) + serial->rPacket[7])/100.00);
+						Stepper_SetTraget(3, ((float_t)(serial->rPacket[10]<<8) + serial->rPacket[9])/100.00);
 						Servo_tragetPos(2, (serial->rPacket[12]<<8) + serial->rPacket[11]);
 
-						updateJoint(serial->rPacket[6]<<8) + serial->rPacket[5], (serial->rPacket[8]<<8) + serial->rPacket[7], (serial->rPacket[10]<<8) + serial->rPacket[9], (serial->rPacket[12]<<8) + serial->rPacket[11]);
+//						updateJoint((serial->rPacket[6]<<8) + serial->rPacket[5], (serial->rPacket[8]<<8) + serial->rPacket[7], (serial->rPacket[10]<<8) + serial->rPacket[9], (serial->rPacket[12]<<8) + serial->rPacket[11]);
 						break;
 					case XYZ_MOVE:
-						updateXYZ((serial->rPacket[6]<<8) + serial->rPacket[5], (serial->rPacket[8]<<8) + serial->rPacket[7], (serial->rPacket[10]<<8) + serial->rPacket[9]);
+						updateJoint((serial->rPacket[12]<<8) + serial->rPacket[11], (serial->rPacket[6]<<8) + serial->rPacket[5], (serial->rPacket[8]<<8) + serial->rPacket[7], (serial->rPacket[10]<<8) + serial->rPacket[9]);
+//						updateXYZ((serial->rPacket[6]<<8) + serial->rPacket[5], (serial->rPacket[8]<<8) + serial->rPacket[7], (serial->rPacket[10]<<8) + serial->rPacket[9]);
 						break;
 					case GRIP_CHESS:
 						Servo_gripperChess(2, (serial->rPacket[12]<<8) + serial->rPacket[11]);

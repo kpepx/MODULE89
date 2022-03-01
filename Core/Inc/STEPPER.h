@@ -12,9 +12,20 @@
 #define NUM_STEPPER 5 // amount motor to used
 #define DEFAULT_MIN_SPEED 1
 #define DEFAULT_MAX_SPEED 400000
-#define ANGLE_TO_ENCODER 8192/36000 //8192 from encoder mode PPR x 4, 36000 from 360.00 * 100 degrees
-#define SCALAR_TO_ENCODER 8192/100 //100 measure mm
-#define OFFSET 15000 // offset count encoder
+#define ENCODER1_TO_ANGLE 36000.00/15369.00
+#define ANGLE_TO_ENCODER1 15369.00/36000.00
+#define ENCODER2_TO_ANGLE 36000.00/15369.00
+#define ANGLE_TO_ENCODER2 15369.00/36000.00
+#define ENCODER3_TO_SCALAR 10650.00/18530.00
+#define SCALAR_TO_ENCODER3 18530.00/10650.00
+//#define ANGLE_TO_ENCODER 36000/8192 //8192 from encoder mode PPR x 4, 36000 from 360.00 degrees * 100
+//#define SCALAR_TO_ENCODER 100/8192 //100 measure mm
+//#define ENCODER_TO_ANGLE 8192/36000 //8192 from encoder mode PPR x 4, 36000 from 360.00 degrees * 100
+//#define ENCODER_TO_SCALAR 8192/100 //100 measure mm
+#define OFFSET 30000 // offset count encoder
+//q1 encoder xxxxx per 360 degree
+//q2 encoder 15369 per 360 degree
+//q3 encoder 18530 per 106.5 mm
 
 //int AllHome_status = 0;
 
@@ -60,8 +71,8 @@ typedef struct{
 	volatile int32_t minSpeed;
 	volatile int32_t maxSpeed;
 
-	volatile int32_t minPosition;
-	volatile int32_t maxPosition;
+	volatile float_t minPosition;
+	volatile float_t maxPosition;
 
 	//Setup acceleration
 	volatile int32_t acceleration;
@@ -73,13 +84,17 @@ typedef struct{
 
 	volatile int32_t targetPosition;
 
+	volatile int32_t currentPosition;
+
+	volatile float_t targetPosition_real;
+
+	volatile float_t currentPosition_real;
+
 	volatile int32_t stepCtrlPrescaller;
 
 	volatile int32_t stepCtrlPrescallerTicks;
 
 	volatile int32_t breakInitiationSpeed;
-
-	volatile int32_t currentPosition;
 
 	volatile stepper_status status;
 
@@ -93,21 +108,21 @@ typedef struct{
 extern uint32_t STEP_TIMER_CLOCK;
 extern uint32_t STEP_CONTROLLER_PERIOD_US;
 
-stepper_error setupStepper(int num, TIM_HandleTypeDef * stepTimer, uint32_t stepChannel, GPIO_TypeDef * dirGPIO, uint16_t dirPIN, stepper_mode mode);
+stepper_error Stepper_Setup(int num, TIM_HandleTypeDef * stepTimer, uint32_t stepChannel, GPIO_TypeDef * dirGPIO, uint16_t dirPIN, stepper_mode mode);
 
 void Stepper_SetStepTimer(stepper_state * stepper);
 
 stepper_error Stepper_DefaultState(int num);
 
-stepper_error Stepper_SetMinPosition(int num, uint16_t value);
+stepper_error Stepper_SetMinPosition(int num, float_t value);
 
-stepper_error Stepper_SetMaxPosition(int num, uint16_t value);
+stepper_error Stepper_SetMaxPosition(int num, float_t value);
 
 stepper_error Stepper_SetMinSpeed(int num, uint16_t value);
 
 stepper_error Stepper_SetMaxSpeed(int num, uint16_t value);
 
-stepper_error Stepper_SetTraget(int num, uint16_t value);
+stepper_error Stepper_SetTraget(int num, float_t value);
 
 stepper_error Stepper_SetSpeed(int num, int32_t value);
 
@@ -122,5 +137,15 @@ void Stepper_runStep(int num);
 void Stepper_StartStop(int num, uint8_t j);
 
 void Stepper_updateHome(int num, int value);
+
+void Stepper_SetHome(int num, int dir, int on);
+
+int32_t Stepper_currentPosition(int num);
+
+float_t Stepper_currentPosition_real(int num);
+
+float_t encoder_to_joint(int num, int32_t value);
+
+int32_t joint_to_encoder(int num, float_t value);
 
 #endif /* __STEPPER_H */

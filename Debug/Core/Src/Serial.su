@@ -9,4 +9,4 @@ Serial.c:68:6:iRead	16	static
 Serial.c:81:6:iWrite	24	static
 Serial.c:97:6:sendIPacket	16	static
 Serial.c:106:6:data_in	24	static
-Serial.c:111:6:selectPacket	24	static
+Serial.c:111:6:selectPacket	32	static

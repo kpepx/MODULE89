@@ -58,42 +58,47 @@ stepper_error Stepper_DefaultState(int num){
 	return SERR_OK;
 }
 
-stepper_error Stepper_SetMinPosition(int num, uint16_t value){
+stepper_error Stepper_SetMinPosition(int num, float_t value){
 	stepper_state * stepper = &steppers[num];
 	stepper->minPosition = value;
+	return SERR_OK;
 }
 
-stepper_error Stepper_SetMaxPosition(int num, uint16_t value){
+stepper_error Stepper_SetMaxPosition(int num, float_t value){
 	stepper_state * stepper = &steppers[num];
 	stepper->maxPosition = value;
+	return SERR_OK;
 }
 
 stepper_error Stepper_SetMinSpeed(int num, uint16_t value){
 	stepper_state * stepper = &steppers[num];
 	stepper->minSpeed = value;
+	return SERR_OK;
 }
 
 stepper_error Stepper_SetMaxSpeed(int num, uint16_t value){
 	stepper_state * stepper = &steppers[num];
 	stepper->maxSpeed = value;
+	return SERR_OK;
 }
 
-stepper_error Stepper_SetTraget(int num, uint16_t value){
+stepper_error Stepper_SetTraget(int num, float_t value){
+	//value is mm or degree unit
 	stepper_state * stepper = &steppers[num];
 	if(stepper->status != SS_STOPPED){
 		if(value<stepper->minPosition){
+			stepper->targetPosition_real = stepper->minPosition;
+			stepper->targetPosition = joint_to_encoder(num, stepper->minPosition) + OFFSET;
 			return SERR_LIMIT;
 		}
 		else if (value>stepper->maxPosition) {
+			stepper->targetPosition_real = stepper->maxPosition;
+			stepper->targetPosition = joint_to_encoder(num, stepper->maxPosition) + OFFSET;
 			return SERR_LIMIT;
 		}
 		else {
-			if(stepper->modeStepper == M_ANGLE){
-				stepper->targetPosition = value*ANGLE_TO_ENCODER + OFFSET;
-			}
-			else {
-				stepper->targetPosition = value*SCALAR_TO_ENCODER + OFFSET;
-			}
+			stepper->targetPosition_real = value; //input mm or degree unit
+			stepper->targetPosition = joint_to_encoder(num, value*100.00) + OFFSET; //convert to encoder count
 			stepper->status = SS_STARTING;
 		}
 	}
@@ -136,6 +141,8 @@ void disable_Stepper_OE(){
 
 void Stepper_runStep(int num){
 	stepper_state * stepper = &steppers[num];
+	Stepper_currentPosition(num);
+	Stepper_currentPosition_real(num);
 	if(stepper->status != SS_STOPPED){
 //		enable_Stepper_OE();
 		HAL_TIM_PWM_Start(stepper->STEP_TIMER, stepper->STEP_CHANNEL);
@@ -176,16 +183,60 @@ void Stepper_updateHome(int num, int value){
 
 int8_t Stepper_Checkhome(int num){
 	stepper_state * stepper = &steppers[num];
-	return stepper->home_status;
+	return stepper-> home_status;
 }
 
 void Stepper_SetHome(int num, int dir, int on){
 	stepper_state * stepper = &steppers[num];
 	if(on){
-		stepper->home_status = 0;
-		stepper->DIR_GPIO->BSRR = stepper->DIR_PIN; //BSRR change pin to set/reset
+		stepper-> home_status = 0;
+		stepper-> DIR_GPIO->BSRR = stepper->DIR_PIN; //BSRR change pin to set/reset
 		stepper -> STEP_TIMER -> Instance -> PSC = 5;
 		stepper -> STEP_TIMER -> Instance -> ARR = 25000;
 		stepper -> STEP_TIMER -> Instance -> CCR1 = 25000/2;
 	}
+}
+
+int32_t Stepper_currentPosition(int num){
+	//update current real encoder of robot
+	stepper_state * stepper = &steppers[num];
+	stepper->currentPosition = Get_Value_Encoder(num);
+	return stepper->currentPosition;
+}
+
+float_t Stepper_currentPosition_real(int num){
+	//update current real position of robot
+	stepper_state * stepper = &steppers[num];
+	stepper->currentPosition_real = encoder_to_joint(num, abs(Stepper_currentPosition(num)-OFFSET))/100.00;
+	return stepper->currentPosition_real;
+}
+
+float_t encoder_to_joint(int num, int32_t value){
+	//convert to mm or degree
+	float_t ans;
+	if(num == 1){
+		ans = value*ENCODER1_TO_ANGLE;
+	}
+	else if(num == 2){
+		ans = value*ENCODER2_TO_ANGLE;
+	}
+	else if(num == 3){
+		ans = value*ENCODER3_TO_SCALAR;
+	}
+	return ans;
+}
+
+int32_t joint_to_encoder(int num, float_t value){
+	//convert to encoder count
+	int32_t ans;
+	if(num == 1){
+		ans = value*ANGLE_TO_ENCODER1;
+	}
+	else if(num == 2){
+		ans = value*ANGLE_TO_ENCODER2;
+	}
+	else if(num == 3){
+		ans = value*SCALAR_TO_ENCODER3;
+	}
+	return ans;
 }

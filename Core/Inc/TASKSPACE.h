@@ -11,17 +11,23 @@
 #define NUM_TASKSPACE 1
 
 typedef struct{
-	int number;
-	volatile int32_t X;
-	volatile int32_t Y;
-	volatile int32_t Z;
+	volatile double q1;
+	volatile double q2;
+	volatile double q3;
+	volatile double q4;
+	volatile double qi1;
+	volatile double qi2;
+	volatile double qi3;
+	volatile double qi4;
 
 
 }taskspace_state;
 
-void updateXYZ(int32_t joint1, int32_t joint2, int32_t joint3, int32_t joint4);
+void updateXYZ(int32_t x, int32_t y, int32_t z);
 
-void updateJoint(int32_t x, int32_t y, int32_t z);
+void updateJoint(int32_t roll, int32_t x, int32_t y, int32_t z);
+
+double to_radian(double value);
 
 
 #endif /* __TASKSPACE_H */

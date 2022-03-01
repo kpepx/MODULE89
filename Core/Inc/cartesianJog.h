@@ -8,29 +8,36 @@
  * C/C++ source code generated on  : 27-Feb-2022 18:10:00
  */
 
-#ifndef CARTESIANJOG_H
-#define CARTESIANJOG_H
+#ifndef __CARTESIANJOG_H
+#define __CARTESIANJOG_H
 
 /* Include Files */
-#include "rtwtypes.h"
+//#include "rtwtypes.h"
 #include <stddef.h>
 #include <stdlib.h>
-#ifdef __cplusplus
+#include "stm32h7xx_hal.h"
 
-extern "C" {
+#define NUM_CARTESIAN 1
 
-#endif
+typedef struct{
+  volatile double q1;
+  volatile double q2;
+  volatile double q3;
+  volatile double q4;
 
-  /* Function Declarations */
-  extern void cartesianJog(const double qi[4], const double deltak[4], double
-    qf[4]);
+}cartesian_state;
 
-#ifdef __cplusplus
+void cartesianJog(double qi[4], double deltak[4]);
 
-}
-#endif
-#endif
+double get_cartesian_q1();
 
+double get_cartesian_q2();
+
+double get_cartesian_q3();
+
+double get_cartesian_q4();
+
+#endif /* __CARTESIANJOG_H */
 /*
  * File trailer for cartesianJog.h
  *
