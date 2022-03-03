@@ -8,6 +8,7 @@
 #include "math.h"
 #include "QEI.h"
 #include "PID.h"
+#include "TASKSPACE.h"
 
 static stepper_state steppers[NUM_STEPPER];
 
@@ -88,12 +89,12 @@ stepper_error Stepper_SetTraget(int num, float_t value){
 	if(stepper->status != SS_STOPPED){
 		if(value<stepper->minPosition){
 			stepper->targetPosition_real = stepper->minPosition;
-			stepper->targetPosition = joint_to_encoder(num, stepper->minPosition) + OFFSET;
+			stepper->targetPosition = joint_to_encoder(num, (stepper->minPosition)*100.00) + OFFSET;
 			return SERR_LIMIT;
 		}
 		else if (value>stepper->maxPosition) {
 			stepper->targetPosition_real = stepper->maxPosition;
-			stepper->targetPosition = joint_to_encoder(num, stepper->maxPosition) + OFFSET;
+			stepper->targetPosition = joint_to_encoder(num, (stepper->maxPosition)*100.00) + OFFSET;
 			return SERR_LIMIT;
 		}
 		else {
@@ -156,6 +157,7 @@ void Stepper_runStep(int num){
 	stepper_state * stepper = &steppers[num];
 	Stepper_currentPosition(num);
 	Stepper_currentPosition_real(num);
+//	update_FK_real();
 	if(stepper->status != SS_STOPPED){
 //		enable_Stepper_OE();
 		HAL_TIM_PWM_Start(stepper->STEP_TIMER, stepper->STEP_CHANNEL);
@@ -225,6 +227,12 @@ float_t Stepper_currentPosition_real(int num){
 	return stepper->currentPosition_real;
 }
 
+float_t Stepper_targetPosition_real(int num){
+	//send target real position of robot
+	stepper_state * stepper = &steppers[num];
+	return stepper->targetPosition_real;
+}
+
 float_t encoder_to_joint(int num, int32_t value){
 	//convert to mm or degree
 	float_t ans;
@@ -254,3 +262,5 @@ int32_t joint_to_encoder(int num, float_t value){
 	}
 	return ans;
 }
+
+

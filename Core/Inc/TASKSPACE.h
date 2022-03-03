@@ -20,6 +20,11 @@ typedef struct{
 	volatile double qi3;
 	volatile double qi4;
 
+	volatile double d1;
+	volatile double d2;
+	volatile double d3;
+	volatile double d4;
+
 
 }taskspace_state;
 
@@ -30,5 +35,7 @@ void updateJoint(int32_t roll, int32_t x, int32_t y, int32_t z);
 double to_radian(double value);
 
 double to_degree(double value);
+
+void update_FK_real();
 
 #endif /* __TASKSPACE_H */

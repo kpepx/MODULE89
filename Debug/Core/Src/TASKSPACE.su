@@ -1,4 +1,5 @@
 TASKSPACE.c:14:6:updateXYZ	24	static
 TASKSPACE.c:18:8:to_degree	16	static
 TASKSPACE.c:22:8:to_radian	16	static
-TASKSPACE.c:26:6:updateJoint	136	static
+TASKSPACE.c:26:6:updateJoint	128	static
+TASKSPACE.c:63:6:update_FK_real	40	static

@@ -34,7 +34,7 @@ void forwardKinematic(const double q[4])
     eulShaped_idx_2 = 0.0;
   }
 
-  fk->roll = eulShaped_idx_2; //degree
+  fk->roll = eulShaped_idx_2; //radian
   fk->X = 412.75 * cos(Rota_tmp_tmp_tmp) + 248.0 * cos(q[0]); //mm
   fk->Y = 412.75 * sin(Rota_tmp_tmp_tmp) + 248.0 * sin(q[0]); //mm
   fk->Z = 249.25 - q[2]; //mm

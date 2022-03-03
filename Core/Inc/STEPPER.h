@@ -144,6 +144,8 @@ int32_t Stepper_currentPosition(int num);
 
 float_t Stepper_currentPosition_real(int num);
 
+float_t Stepper_targetPosition_real(int num);
+
 float_t encoder_to_joint(int num, int32_t value);
 
 int32_t joint_to_encoder(int num, float_t value);
