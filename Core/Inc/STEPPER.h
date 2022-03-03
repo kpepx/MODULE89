@@ -12,8 +12,8 @@
 #define NUM_STEPPER 5 // amount motor to used
 #define DEFAULT_MIN_SPEED 1
 #define DEFAULT_MAX_SPEED 400000
-#define ENCODER1_TO_ANGLE 36000.00/15369.00
-#define ANGLE_TO_ENCODER1 15369.00/36000.00
+#define ENCODER1_TO_ANGLE 36000.00/8071.00
+#define ANGLE_TO_ENCODER1 8071.00/36000.00
 #define ENCODER2_TO_ANGLE 36000.00/15369.00
 #define ANGLE_TO_ENCODER2 15369.00/36000.00
 #define ENCODER3_TO_SCALAR 10650.00/18530.00
@@ -23,7 +23,7 @@
 //#define ENCODER_TO_ANGLE 8192/36000 //8192 from encoder mode PPR x 4, 36000 from 360.00 degrees * 100
 //#define ENCODER_TO_SCALAR 8192/100 //100 measure mm
 #define OFFSET 30000 // offset count encoder
-//q1 encoder xxxxx per 360 degree
+//q1 encoder 8192 per 360 degree
 //q2 encoder 15369 per 360 degree
 //q3 encoder 18530 per 106.5 mm
 

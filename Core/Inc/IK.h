@@ -24,11 +24,12 @@ typedef struct{
   volatile double q2;
   volatile double q3;
   volatile double q4;
+  volatile int check;
 
 }ik_state;
 
 /* Function Declarations */
-void IK(const double pos[3], double oriz, double gram, double qi[4], double *check);
+void IK(double pos[3], double oriz, double gram);
 
 
 #endif /* __IK_H */

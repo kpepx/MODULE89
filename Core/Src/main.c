@@ -202,7 +202,7 @@ int main(void)
   Stepper_SetMaxPosition(3, 150.00);
   Stepper_Setup(4, &htim12, TIM_CHANNEL_2, DIR4_GPIO_Port, DIR4_Pin, 1);
   Stepper_SetMinPosition(4, 0);
-  Stepper_SetMaxPosition(4, 36000);
+  Stepper_SetMaxPosition(4, 150.00);
   Stepper_DefaultState(1);
   Stepper_DefaultState(2);
   Stepper_DefaultState(3);
@@ -216,10 +216,10 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim5);
 
   //PID Setup
-  setupPID(1, 0.05, -3200, 3200, 1, 0, 0);
-  setupPID(2, 0.05, -3200, 3200, 1, 0, 0);
-  setupPID(3, 0.05, -3200, 3200, 1, 0, 0);
-  setupPID(4, 0.05, -3200, 3200, 1, 0, 0);
+  setupPID(1, 0.001, -50, 50, 0.5, 0, 0);
+  setupPID(2, 0.001, -50, 50, 0.5, 0, 0);
+  setupPID(3, 0.05, -800, 800, 1.0, 0, 0);
+  setupPID(4, 0.05, -800, 800, 1.0, 0, 0);
 
   //Encoder Setup
   Encoder_Start(1, &htim1, TIM_CHANNEL_ALL);
@@ -391,16 +391,19 @@ static void MX_ETH_Init(void)
 
   /* USER CODE END ETH_Init 0 */
 
+   static uint8_t MACAddr[6];
+
   /* USER CODE BEGIN ETH_Init 1 */
 
   /* USER CODE END ETH_Init 1 */
   heth.Instance = ETH;
-  heth.Init.MACAddr[0] =   0x00;
-  heth.Init.MACAddr[1] =   0x80;
-  heth.Init.MACAddr[2] =   0xE1;
-  heth.Init.MACAddr[3] =   0x00;
-  heth.Init.MACAddr[4] =   0x00;
-  heth.Init.MACAddr[5] =   0x00;
+  MACAddr[0] = 0x00;
+  MACAddr[1] = 0x80;
+  MACAddr[2] = 0xE1;
+  MACAddr[3] = 0x00;
+  MACAddr[4] = 0x00;
+  MACAddr[5] = 0x00;
+  heth.Init.MACAddr = &MACAddr[0];
   heth.Init.MediaInterface = HAL_ETH_RMII_MODE;
   heth.Init.TxDesc = DMATxDscrTab;
   heth.Init.RxDesc = DMARxDscrTab;
@@ -1148,8 +1151,15 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : DIR2_Pin DIR1_Pin PF9 DIR4_Pin */
-  GPIO_InitStruct.Pin = DIR2_Pin|DIR1_Pin|GPIO_PIN_9|DIR4_Pin;
+  /*Configure GPIO pins : DIR2_Pin DIR1_Pin DIR4_Pin */
+  GPIO_InitStruct.Pin = DIR2_Pin|DIR1_Pin|DIR4_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PF9 */
+  GPIO_InitStruct.Pin = GPIO_PIN_9;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -1171,12 +1181,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : DIR3_Pin LD2_Pin */
-  GPIO_InitStruct.Pin = DIR3_Pin|LD2_Pin;
+  /*Configure GPIO pin : DIR3_Pin */
+  GPIO_InitStruct.Pin = DIR3_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+  HAL_GPIO_Init(DIR3_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : STLINK_RX_Pin STLINK_TX_Pin */
   GPIO_InitStruct.Pin = STLINK_RX_Pin|STLINK_TX_Pin;
@@ -1210,6 +1220,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : LD2_Pin */
+  GPIO_InitStruct.Pin = LD2_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(LD2_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI4_IRQn, 0, 0);

@@ -29,5 +29,6 @@ void updateJoint(int32_t roll, int32_t x, int32_t y, int32_t z);
 
 double to_radian(double value);
 
+double to_degree(double value);
 
 #endif /* __TASKSPACE_H */

@@ -15,19 +15,29 @@
 //#include "rtwtypes.h"
 #include <stddef.h>
 #include <stdlib.h>
-#ifdef __cplusplus
+#include "stm32h7xx_hal.h"
 
-extern "C" {
+#define NUM_FK 1
 
-#endif
+typedef struct{
+  volatile double roll;
+  volatile double X;
+  volatile double Y;
+  volatile double Z;
+
+}fk_state;
 
   /* Function Declarations */
-  extern void forwardKinematic(const double q[4], double klee[4]);
+void forwardKinematic(const double q[4]);
 
-#ifdef __cplusplus
+double get_fk_roll();
 
-}
-#endif
+double get_fk_X();
+
+double get_fk_Y();
+
+double get_fk_Z();
+
 #endif
 
 /*

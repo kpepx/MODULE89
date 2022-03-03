@@ -15,58 +15,11 @@
 //#include "rt_nonfinite.h"
 #include <math.h>
 
-///* Function Declarations */
-//static double rt_atan2d_snf(double u0, double u1);
-//
-///* Function Definitions */
-///*
-// * Arguments    : double u0
-// *                double u1
-// * Return Type  : double
-// */
-//static double rt_atan2d_snf(double u0, double u1)
-//{
-//  double y;
-//  int b_u0;
-//  int b_u1;
-//  if (rtIsNaN(u0) || rtIsNaN(u1)) {
-//    y = rtNaN;
-//  } else if (rtIsInf(u0) && rtIsInf(u1)) {
-//    if (u0 > 0.0) {
-//      b_u0 = 1;
-//    } else {
-//      b_u0 = -1;
-//    }
-//
-//    if (u1 > 0.0) {
-//      b_u1 = 1;
-//    } else {
-//      b_u1 = -1;
-//    }
-//
-//    y = atan2(b_u0, b_u1);
-//  } else if (u1 == 0.0) {
-//    if (u0 > 0.0) {
-//      y = RT_PI / 2.0;
-//    } else if (u0 < 0.0) {
-//      y = -(RT_PI / 2.0);
-//    } else {
-//      y = 0.0;
-//    }
-//  } else {
-//    y = atan2(u0, u1);
-//  }
-//
-//  return y;
-//}
+static fk_state fks[NUM_FK];
 
-/*
- * Arguments    : const double q[4]
- *                double klee[4]
- * Return Type  : void
- */
-void forwardKinematic(const double q[4], double klee[4])
+void forwardKinematic(const double q[4])
 {
+	fk_state * fk = &fks[0];
   double Rota_idx_1;
   double Rota_tmp;
   double Rota_tmp_tmp_tmp;
@@ -81,10 +34,30 @@ void forwardKinematic(const double q[4], double klee[4])
     eulShaped_idx_2 = 0.0;
   }
 
-  klee[0] = eulShaped_idx_2;
-  klee[1] = 412.75 * cos(Rota_tmp_tmp_tmp) + 248.0 * cos(q[0]);
-  klee[2] = 412.75 * sin(Rota_tmp_tmp_tmp) + 248.0 * sin(q[0]);
-  klee[3] = 249.25 - q[2];
+  fk->roll = eulShaped_idx_2; //degree
+  fk->X = 412.75 * cos(Rota_tmp_tmp_tmp) + 248.0 * cos(q[0]); //mm
+  fk->Y = 412.75 * sin(Rota_tmp_tmp_tmp) + 248.0 * sin(q[0]); //mm
+  fk->Z = 249.25 - q[2]; //mm
+}
+
+double get_fk_roll(){
+	fk_state * fk = &fks[0];
+	return fk->roll;
+}
+
+double get_fk_X(){
+	fk_state * fk = &fks[0];
+	return fk->X;
+}
+
+double get_fk_Y(){
+	fk_state * fk = &fks[0];
+	return fk->Y;
+}
+
+double get_fk_Z(){
+	fk_state * fk = &fks[0];
+	return fk->Z;
 }
 
 /*

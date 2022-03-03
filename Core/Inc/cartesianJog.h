@@ -27,7 +27,7 @@ typedef struct{
 
 }cartesian_state;
 
-void cartesianJog(double qi[4], double deltak[4]);
+void cartesianJog(const double qi[4],const double deltak[4]);
 
 double get_cartesian_q1();
 

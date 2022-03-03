@@ -22,7 +22,7 @@
 
 static cartesian_state cartesians[NUM_CARTESIAN];
 
-void cartesianJog(double qi[4], double deltak[4])
+void cartesianJog(const double qi[4], const double deltak[4])
 {
 	cartesian_state * cartesian = &cartesians[0];
 	double b_qf_tmp;

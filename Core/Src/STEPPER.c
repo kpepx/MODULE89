@@ -121,13 +121,26 @@ stepper_error Stepper_SetSpeed(int num, int32_t value){
 void Stepper_Direction(stepper_state * stepper){
 	int32_t input = calculator(stepper->number, Get_Value_Encoder(stepper->number), stepper->targetPosition);
 	Stepper_SetSpeed(stepper->number, abs(input));
-	if(input<0){
-		stepper->status = SS_RUNNING_FORWARD;
-		stepper->DIR_GPIO->BSRR = (uint32_t)stepper->DIR_PIN << (16U); //BSRR change pin to set/reset
+	if(input>0){
+		if(stepper->number == 1){
+			stepper->status = SS_RUNNING_BACKWARD;
+			stepper->DIR_GPIO->BSRR = stepper->DIR_PIN; //BSRR change pin to set/reset
+		}
+		if(stepper->number == 2){
+			stepper->status = SS_RUNNING_FORWARD;
+			stepper->DIR_GPIO->BSRR = (uint32_t)stepper->DIR_PIN << (16U); //BSRR change pin to set/reset
+		}
+
 	}
 	else {
-		stepper->status = SS_RUNNING_BACKWARD;
-		stepper->DIR_GPIO->BSRR = stepper->DIR_PIN; //BSRR change pin to set/reset
+		if(stepper->number == 1){
+			stepper->status = SS_RUNNING_FORWARD;
+			stepper->DIR_GPIO->BSRR = (uint32_t)stepper->DIR_PIN << (16U); //BSRR change pin to set/reset
+		}
+		if(stepper->number == 2){
+			stepper->status = SS_RUNNING_BACKWARD;
+			stepper->DIR_GPIO->BSRR = stepper->DIR_PIN; //BSRR change pin to set/reset
+		}
 	}
 }
 
@@ -207,7 +220,8 @@ int32_t Stepper_currentPosition(int num){
 float_t Stepper_currentPosition_real(int num){
 	//update current real position of robot
 	stepper_state * stepper = &steppers[num];
-	stepper->currentPosition_real = encoder_to_joint(num, abs(Stepper_currentPosition(num)-OFFSET))/100.00;
+//	stepper->currentPosition_real = encoder_to_joint(num, abs(Stepper_currentPosition(num)-OFFSET))/100.00;
+	stepper->currentPosition_real = encoder_to_joint(num, Stepper_currentPosition(num)-OFFSET)/100.00;
 	return stepper->currentPosition_real;
 }
 
