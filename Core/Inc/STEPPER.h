@@ -102,6 +102,8 @@ typedef struct{
 
 	volatile int8_t home_status;
 
+	volatile int dir;
+
 
 }stepper_state;
 

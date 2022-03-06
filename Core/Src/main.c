@@ -188,8 +188,6 @@ int main(void)
   //htim13 stepper 3
   //htim12 stepper 4
 
-
-
   //Stepper Setup
   Stepper_Setup(1, &htim16, TIM_CHANNEL_1, DIR1_GPIO_Port, DIR1_Pin, 0);
   Stepper_SetMinPosition(1, 0.0);
@@ -244,15 +242,14 @@ int main(void)
 	  Stepper_runStep(1);
 	  Stepper_runStep(2);
 	  Stepper_runStep(3);
-	  Stepper_runStep(4);
+//	  Stepper_runStep(4);
 	  if(state){
 		  Stepper_runStep(1);
 		  Stepper_runStep(2);
 		  Stepper_runStep(3);
-		  Stepper_runStep(4);
+//		  Stepper_runStep(4);
 		  state = 0;
 	  }
-
 	  selectPacket(1);
 
     /* USER CODE END WHILE */

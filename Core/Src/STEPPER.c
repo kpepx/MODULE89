@@ -131,6 +131,10 @@ void Stepper_Direction(stepper_state * stepper){
 			stepper->status = SS_RUNNING_FORWARD;
 			stepper->DIR_GPIO->BSRR = (uint32_t)stepper->DIR_PIN << (16U); //BSRR change pin to set/reset
 		}
+		if(stepper->number == 3){
+			stepper->status = SS_RUNNING_FORWARD;
+			stepper->DIR_GPIO->BSRR = stepper->DIR_PIN; //BSRR change pin to set/reset
+		}
 
 	}
 	else {
@@ -141,6 +145,10 @@ void Stepper_Direction(stepper_state * stepper){
 		if(stepper->number == 2){
 			stepper->status = SS_RUNNING_BACKWARD;
 			stepper->DIR_GPIO->BSRR = stepper->DIR_PIN; //BSRR change pin to set/reset
+		}
+		if(stepper->number == 3){
+			stepper->status = SS_RUNNING_BACKWARD;
+			stepper->DIR_GPIO->BSRR = (uint32_t)stepper->DIR_PIN << (16U); //BSRR change pin to set/reset
 		}
 	}
 }
@@ -204,11 +212,21 @@ int8_t Stepper_Checkhome(int num){
 void Stepper_SetHome(int num, int dir, int on){
 	stepper_state * stepper = &steppers[num];
 	if(on){
-		stepper-> home_status = 0;
-		stepper-> DIR_GPIO->BSRR = stepper->DIR_PIN; //BSRR change pin to set/reset
-		stepper -> STEP_TIMER -> Instance -> PSC = 5;
-		stepper -> STEP_TIMER -> Instance -> ARR = 25000;
-		stepper -> STEP_TIMER -> Instance -> CCR1 = 25000/2;
+		if(num == 3){
+			stepper-> home_status = 0;
+			stepper->DIR_GPIO->BSRR = (uint32_t)stepper->DIR_PIN << (16U); //BSRR change pin to set/reset
+			stepper -> STEP_TIMER -> Instance -> PSC = 25;
+			stepper -> STEP_TIMER -> Instance -> ARR = 64000;
+			stepper -> STEP_TIMER -> Instance -> CCR1 = 64000/2;
+		}
+		else{
+			stepper-> home_status = 0;
+			stepper-> DIR_GPIO->BSRR = stepper->DIR_PIN; //BSRR change pin to set/reset
+			stepper -> STEP_TIMER -> Instance -> PSC = 25;
+			stepper -> STEP_TIMER -> Instance -> ARR = 64000;
+			stepper -> STEP_TIMER -> Instance -> CCR1 = 64000/2;
+		}
+
 	}
 }
 

@@ -57,7 +57,7 @@ void updateJoint(int32_t roll, int32_t x, int32_t y, int32_t z){
 
 	Stepper_SetTraget(1, to_degree(taskspace->q1));
 	Stepper_SetTraget(2, to_degree(taskspace->q2));
-	Stepper_SetTraget(3, taskspace->q3);
+	Stepper_SetTraget(3, abs(taskspace->q3));
 }
 
 void update_FK_real(){
