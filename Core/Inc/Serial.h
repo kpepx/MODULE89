@@ -86,7 +86,7 @@ uint8_t SHIFT_TO_LSB(uint16_t w);
 
 uint8_t SHIFT_TO_MSB(uint16_t w);
 
-void Servo_gripperChess(int num, uint8_t value);
+void Servo_gripperChess(int num, uint16_t value);
 
 void Servo_tragetPos(int num, uint16_t pos);
 

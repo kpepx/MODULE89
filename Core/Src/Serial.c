@@ -31,8 +31,14 @@ uint8_t SHIFT_TO_LSB(uint16_t w){
 uint8_t SHIFT_TO_MSB(uint16_t w){
 	return (w >> 8) & 0x00ff;
 }
+//int16_t check_neg(int16_t w){
+//	if(w >> 15 == 1){
+//
+//	}
+//	return
+//}
 
-void Servo_gripperChess(int num, uint8_t value){
+void Servo_gripperChess(int num, uint16_t value){
 	serial_state * serial = &Serials[num];
 	serial->length = 2;
 	serial->instruction = WRITE_DATA;
@@ -162,15 +168,15 @@ void selectPacket(int num){
 						Servo_StartStop(2, (serial->rPacket[12]<<8) + serial->rPacket[11]);
 						break;
 					case JOINT_MOVE:
-						Stepper_SetTraget(1, ((float_t)(serial->rPacket[6]<<8) + serial->rPacket[5])/100.00);
-						Stepper_SetTraget(2, ((float_t)(serial->rPacket[8]<<8) + serial->rPacket[7])/100.00);
-						Stepper_SetTraget(3, ((float_t)(serial->rPacket[10]<<8) + serial->rPacket[9])/100.00);
+						Stepper_SetTraget(1, ((float_t)(int16_t)((serial->rPacket[6]<<8) + serial->rPacket[5]))/100.00);
+						Stepper_SetTraget(2, ((float_t)(int16_t)((serial->rPacket[8]<<8) + serial->rPacket[7]))/100.00);
+						Stepper_SetTraget(3, ((float_t)(int16_t)((serial->rPacket[10]<<8) + serial->rPacket[9]))/100.00);
 						Servo_tragetPos(2, (serial->rPacket[12]<<8) + serial->rPacket[11]);
 
 //						updateJoint((serial->rPacket[6]<<8) + serial->rPacket[5], (serial->rPacket[8]<<8) + serial->rPacket[7], (serial->rPacket[10]<<8) + serial->rPacket[9], (serial->rPacket[12]<<8) + serial->rPacket[11]);
 						break;
 					case XYZ_MOVE:
-						updateJoint((serial->rPacket[12]<<8) + serial->rPacket[11], (serial->rPacket[6]<<8) + serial->rPacket[5], (serial->rPacket[8]<<8) + serial->rPacket[7], (serial->rPacket[10]<<8) + serial->rPacket[9]);
+						updateJoint((int16_t)((serial->rPacket[12]<<8) + serial->rPacket[11]), (int16_t)((serial->rPacket[6]<<8) + serial->rPacket[5]), (int16_t)((serial->rPacket[8]<<8) + serial->rPacket[7]), (int16_t)((serial->rPacket[10]<<8) + serial->rPacket[9]));
 //						updateXYZ((serial->rPacket[6]<<8) + serial->rPacket[5], (serial->rPacket[8]<<8) + serial->rPacket[7], (serial->rPacket[10]<<8) + serial->rPacket[9]);
 						break;
 					case GRIP_CHESS:
