@@ -7,6 +7,7 @@
 #include "STEPPER.h"
 #include "cartesianJog.h"
 #include "forwardKinematic.h"
+#include "IK.h"
 #include <math.h>
 
 static taskspace_state taskspaces[NUM_TASKSPACE];
@@ -52,15 +53,51 @@ void updateJoint(int32_t roll, int32_t x, int32_t y, int32_t z){
 	taskspace->q3 = get_cartesian_q3();
 	taskspace->q4 = get_cartesian_q4();
 
-	double q[4] = {taskspace->q1, taskspace->q2, taskspace->q3, taskspace->q4};
-	forwardKinematic(q);
+//	double q[4] = {taskspace->q1, taskspace->q2, taskspace->q3, taskspace->q4};
+//	forwardKinematic(q);
 
-	Stepper_SetTraget(1, to_degree(taskspace->q1));
-	Stepper_SetTraget(2, to_degree(taskspace->q2));
-	Stepper_SetTraget(3, abs(taskspace->q3));
+//	Stepper_SetTraget(1, to_degree(taskspace->q1));
+//	Stepper_SetTraget(2, to_degree(taskspace->q2));
+//	Stepper_SetTraget(3, abs(taskspace->q3));
+
+//	taskspace->q1 = to_radian((double)Stepper_targetPosition_real(1));
+//		taskspace->q2 = to_radian((double)Stepper_targetPosition_real(2));
+//		taskspace->q3 = (double)Stepper_targetPosition_real(3);
+//		taskspace->q4 = to_radian((double)0.0);
+//		double qq[4] = {taskspace->q1, taskspace->q2, taskspace->q3, taskspace->q4};
+//		forwardKinematic(qq);
+		double x_target = get_fk_X() - cos(2.0*0.0001)*50.0;
+		double y_target = get_fk_Y() - cos(2.0*0.0001)*50.0;
+		taskspace->t1 = x_target;
+		taskspace->t2 = y_target;
+		double xyz[3] = {x_target, y_target, 0};
+		IK(xyz, 0, 1);
+		Stepper_SetTraget(1, to_degree(get_ik_q1()));
+		Stepper_SetTraget(2, to_degree(get_ik_q2()));
 }
 
 void update_FK_real(){
 	double qi_all[4] = {to_radian((double)Stepper_currentPosition_real(1)), to_radian((double)Stepper_currentPosition_real(2)), (double)Stepper_currentPosition_real(3), to_radian((double)0.0)};
 	forwardKinematic(qi_all);
 }
+
+//void update_tarjectory(){
+//
+//}
+
+void run_tarjectory(){
+	taskspace_state * taskspace = &taskspaces[0];
+	taskspace->q1 = to_radian((double)Stepper_targetPosition_real(1));
+	taskspace->q2 = to_radian((double)Stepper_targetPosition_real(2));
+	taskspace->q3 = (double)Stepper_targetPosition_real(3);
+	taskspace->q4 = to_radian((double)0.0);
+	double q[4] = {taskspace->q1, taskspace->q2, taskspace->q3, taskspace->q4};
+	forwardKinematic(q);
+	double x_target = get_fk_X() + cos(2*0.0001)*50;
+	double y_target = get_fk_Y() + cos(2*0.0001)*50;
+	double xyz[3] = {x_target, y_target, 0};
+	IK(xyz, 0, 1);
+	Stepper_SetTraget(1, to_degree(get_ik_q1()));
+	Stepper_SetTraget(2, to_degree(get_ik_q2()));
+}
+

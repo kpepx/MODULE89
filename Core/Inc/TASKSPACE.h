@@ -25,6 +25,9 @@ typedef struct{
 	volatile double d3;
 	volatile double d4;
 
+	volatile double t1;
+	volatile double t2;
+
 
 }taskspace_state;
 
@@ -37,5 +40,7 @@ double to_radian(double value);
 double to_degree(double value);
 
 void update_FK_real();
+
+void run_tarjectory();
 
 #endif /* __TASKSPACE_H */

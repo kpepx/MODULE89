@@ -33,6 +33,7 @@
 #include "PID.h"
 #include "STEPPER.h"
 #include "Serial.h"
+#include "TASKSPACE.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -239,11 +240,13 @@ int main(void)
   while (1)
   {
 //	  a = HAL_GPIO_ReadPin(PROXIMITY2_GPIO_Port, PROXIMITY2_Pin);
-	  Stepper_runStep(1);
-	  Stepper_runStep(2);
-	  Stepper_runStep(3);
+//	  Stepper_runStep(1);
+//	  Stepper_runStep(2);
+//	  Stepper_runStep(3);
 //	  Stepper_runStep(4);
 	  if(state){
+//		  run_tarjectory();
+		  updateJoint(0,0,0,0);
 		  Stepper_runStep(1);
 		  Stepper_runStep(2);
 		  Stepper_runStep(3);

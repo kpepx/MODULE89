@@ -15,8 +15,8 @@ STEPPER.c:187:6:Stepper_StartStop	24	static
 STEPPER.c:197:6:Stepper_updateHome	24	static
 STEPPER.c:207:8:Stepper_Checkhome	24	static
 STEPPER.c:212:6:Stepper_SetHome	32	static
-STEPPER.c:233:9:Stepper_currentPosition	24	static
-STEPPER.c:240:9:Stepper_currentPosition_real	24	static
-STEPPER.c:248:9:Stepper_targetPosition_real	24	static
-STEPPER.c:254:9:encoder_to_joint	24	static
-STEPPER.c:269:9:joint_to_encoder	24	static
+STEPPER.c:232:9:Stepper_currentPosition	24	static
+STEPPER.c:239:9:Stepper_currentPosition_real	24	static
+STEPPER.c:247:9:Stepper_targetPosition_real	24	static
+STEPPER.c:253:9:encoder_to_joint	24	static
+STEPPER.c:268:9:joint_to_encoder	24	static

@@ -52,6 +52,26 @@ void IK(double pos[3], double oriz, double gram)
   }
 }
 
+double get_ik_q1(){
+	ik_state * ik = &iks[0];
+	return ik->q1;
+}
+
+double get_ik_q2(){
+	ik_state * ik = &iks[0];
+	return ik->q2;
+}
+
+double get_ik_q3(){
+	ik_state * ik = &iks[0];
+	return ik->q3;
+}
+
+double get_ik_q4(){
+	ik_state * ik = &iks[0];
+	return ik->q4;
+}
+
 /*
  * File trailer for IK.c
  *

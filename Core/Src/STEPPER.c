@@ -226,7 +226,6 @@ void Stepper_SetHome(int num, int dir, int on){
 			stepper -> STEP_TIMER -> Instance -> ARR = 64000;
 			stepper -> STEP_TIMER -> Instance -> CCR1 = 64000/2;
 		}
-
 	}
 }
 
@@ -280,5 +279,3 @@ int32_t joint_to_encoder(int num, float_t value){
 	}
 	return ans;
 }
-
-
