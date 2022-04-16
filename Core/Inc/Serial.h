@@ -49,11 +49,10 @@
 #define GRIP_CHESS             0x14
 #define PRESENT_JOINT          0x15
 #define PRESENT_XYZ            0x16
+#define FIELD_MOVE             0x17
 
 //Servo Board
 #define SERVO_JOINT			   0x20
-
-
 
 typedef struct{
 	//number

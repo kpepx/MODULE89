@@ -33,7 +33,7 @@ void IK(double pos[3], double oriz, double gram)
   double c2;
   double q2;
   double s2;
-  c2 = (((pos[0] * pos[0] + pos[1] * pos[1]) - 61504.0) - 170362.5625) /
+  c2 = (((pos[0] * pos[0] + pos[1] * pos[1]) - 61504.0) - 170544.22090000001) /
     204724.0;
   s2 = 1.0 - c2 * c2;
   if (s2 >= 0.0) {
@@ -42,10 +42,10 @@ void IK(double pos[3], double oriz, double gram)
     q2 = atan2(s2, c2);
 
     ik->q2 = q2;
-    s2 = atan2(pos[1], pos[0]) - atan2(412.75 * s2, 412.75 * c2
+    s2 = atan2(pos[1], pos[0]) - atan2(412.97 * s2, 412.97 * c2
       + 248.0);
     ik->q1 = s2;
-    ik->q3 = 249.25 - pos[2];
+    ik->q3 = 217.04 - pos[2];
     ik->q4 = (oriz - s2) - q2;
   } else {
     ik->check = 0;

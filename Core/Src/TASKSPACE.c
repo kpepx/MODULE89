@@ -26,14 +26,9 @@ double to_radian(double value){
 
 void updateJoint(int32_t roll, int32_t x, int32_t y, int32_t z){
 	taskspace_state * taskspace = &taskspaces[0];
-//	taskspace->qi1 = to_radian((double)Stepper_currentPosition_real(1));
-//	taskspace->qi2 = to_radian((double)Stepper_currentPosition_real(2));
-//	taskspace->qi3 = (double)Stepper_currentPosition_real(3);
-//	taskspace->qi4 = to_radian((double)0.0);
-
-	taskspace->qi1 = to_radian((double)Stepper_targetPosition_real(1));
-	taskspace->qi2 = to_radian((double)Stepper_targetPosition_real(2));
-	taskspace->qi3 = (double)Stepper_targetPosition_real(3);
+	taskspace->qi1 = to_radian((double)Stepper_currentPosition_real(1));
+	taskspace->qi2 = to_radian((double)Stepper_currentPosition_real(2));
+	taskspace->qi3 = (double)Stepper_currentPosition_real(3);
 	taskspace->qi4 = to_radian((double)0.0);
 
 	double qi_all[4] = {taskspace->qi1, taskspace->qi2, taskspace->qi3, taskspace->qi4};
@@ -53,27 +48,20 @@ void updateJoint(int32_t roll, int32_t x, int32_t y, int32_t z){
 	taskspace->q3 = get_cartesian_q3();
 	taskspace->q4 = get_cartesian_q4();
 
-//	double q[4] = {taskspace->q1, taskspace->q2, taskspace->q3, taskspace->q4};
-//	forwardKinematic(q);
+	double q[4] = {taskspace->q1, taskspace->q2, taskspace->q3, taskspace->q4};
+	forwardKinematic(q);
 
-//	Stepper_SetTraget(1, to_degree(taskspace->q1));
-//	Stepper_SetTraget(2, to_degree(taskspace->q2));
-//	Stepper_SetTraget(3, abs(taskspace->q3));
+	Stepper_SetTraget(1, to_degree(taskspace->q1));
+	Stepper_SetTraget(2, to_degree(taskspace->q2));
+	Stepper_SetTraget(3, abs(taskspace->q3));
 
-//	taskspace->q1 = to_radian((double)Stepper_targetPosition_real(1));
-//		taskspace->q2 = to_radian((double)Stepper_targetPosition_real(2));
-//		taskspace->q3 = (double)Stepper_targetPosition_real(3);
-//		taskspace->q4 = to_radian((double)0.0);
-//		double qq[4] = {taskspace->q1, taskspace->q2, taskspace->q3, taskspace->q4};
-//		forwardKinematic(qq);
-		double x_target = get_fk_X() - cos(2.0*0.0001)*50.0;
-		double y_target = get_fk_Y() - cos(2.0*0.0001)*50.0;
-		taskspace->t1 = x_target;
-		taskspace->t2 = y_target;
-		double xyz[3] = {x_target, y_target, 0};
-		IK(xyz, 0, 1);
-		Stepper_SetTraget(1, to_degree(get_ik_q1()));
-		Stepper_SetTraget(2, to_degree(get_ik_q2()));
+	taskspace->q1 = to_radian((double)Stepper_targetPosition_real(1));
+	taskspace->q2 = to_radian((double)Stepper_targetPosition_real(2));
+	taskspace->q3 = (double)Stepper_targetPosition_real(3);
+	taskspace->q4 = to_radian((double)0.0);
+	double qq[4] = {taskspace->q1, taskspace->q2, taskspace->q3, taskspace->q4};
+	forwardKinematic(qq);
+
 }
 
 void update_FK_real(){
@@ -87,15 +75,21 @@ void update_FK_real(){
 
 void run_tarjectory(){
 	taskspace_state * taskspace = &taskspaces[0];
-	taskspace->q1 = to_radian((double)Stepper_targetPosition_real(1));
-	taskspace->q2 = to_radian((double)Stepper_targetPosition_real(2));
-	taskspace->q3 = (double)Stepper_targetPosition_real(3);
-	taskspace->q4 = to_radian((double)0.0);
-	double q[4] = {taskspace->q1, taskspace->q2, taskspace->q3, taskspace->q4};
-	forwardKinematic(q);
-	double x_target = get_fk_X() + cos(2*0.0001)*50;
-	double y_target = get_fk_Y() + cos(2*0.0001)*50;
+//	taskspace->q1 = to_radian((double)Stepper_targetPosition_real(1));
+//	taskspace->q2 = to_radian((double)Stepper_targetPosition_real(2));
+//	taskspace->q3 = (double)Stepper_targetPosition_real(3);
+//	taskspace->q4 = to_radian((double)0.0);
+//	double q[4] = {taskspace->q1, taskspace->q2, taskspace->q3, taskspace->q4};
+//	forwardKinematic(q);
+	taskspace->t1 += 0.0001;
+	double x_target = 200 + cos(0.2*taskspace->t1)*50;
+	double y_target = 200 + cos(0.2*taskspace->t1)*50;
+//	taskspace->t1 = x_target;
+	taskspace->t2 = y_target;
+//	double x_target = get_fk_X() - cos(2*0.0001)*10;
+//	double y_target = get_fk_Y() - cos(2*0.0001)*10;
 	double xyz[3] = {x_target, y_target, 0};
+
 	IK(xyz, 0, 1);
 	Stepper_SetTraget(1, to_degree(get_ik_q1()));
 	Stepper_SetTraget(2, to_degree(get_ik_q2()));

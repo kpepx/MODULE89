@@ -1,6 +1,6 @@
 TASKSPACE.c:15:6:updateXYZ	24	static
 TASKSPACE.c:19:8:to_degree	16	static
 TASKSPACE.c:23:8:to_radian	16	static
-TASKSPACE.c:27:6:updateJoint	136	static
-TASKSPACE.c:79:6:update_FK_real	40	static
-TASKSPACE.c:88:6:run_tarjectory	88	static
+TASKSPACE.c:27:6:updateJoint	72	static
+TASKSPACE.c:80:6:update_FK_real	40	static
+TASKSPACE.c:89:6:run_tarjectory	56	static

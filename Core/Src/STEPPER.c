@@ -165,7 +165,7 @@ void Stepper_runStep(int num){
 	stepper_state * stepper = &steppers[num];
 	Stepper_currentPosition(num);
 	Stepper_currentPosition_real(num);
-//	update_FK_real();
+	update_FK_real();
 	if(stepper->status != SS_STOPPED){
 //		enable_Stepper_OE();
 		HAL_TIM_PWM_Start(stepper->STEP_TIMER, stepper->STEP_CHANNEL);

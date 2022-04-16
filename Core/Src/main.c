@@ -191,10 +191,10 @@ int main(void)
 
   //Stepper Setup
   Stepper_Setup(1, &htim16, TIM_CHANNEL_1, DIR1_GPIO_Port, DIR1_Pin, 0);
-  Stepper_SetMinPosition(1, -180.00);
+  Stepper_SetMinPosition(1, -360.00);
   Stepper_SetMaxPosition(1, 360.00);
   Stepper_Setup(2, &htim17, TIM_CHANNEL_1, DIR2_GPIO_Port, DIR2_Pin, 0);
-  Stepper_SetMinPosition(2, -180.00);
+  Stepper_SetMinPosition(2, -360.00);
   Stepper_SetMaxPosition(2, 360.00);
   Stepper_Setup(3, &htim13, TIM_CHANNEL_1, DIR3_GPIO_Port, DIR3_Pin, 1);
   Stepper_SetMinPosition(3, -106.00);
@@ -246,7 +246,7 @@ int main(void)
 //	  Stepper_runStep(4);
 	  if(state){
 //		  run_tarjectory();
-		  updateJoint(0,0,0,0);
+//		  updateJoint(0,0,0,0);
 		  Stepper_runStep(1);
 		  Stepper_runStep(2);
 		  Stepper_runStep(3);

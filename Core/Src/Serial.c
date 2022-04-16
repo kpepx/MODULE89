@@ -31,6 +31,7 @@ uint8_t SHIFT_TO_LSB(uint16_t w){
 uint8_t SHIFT_TO_MSB(uint16_t w){
 	return (w >> 8) & 0x00ff;
 }
+
 //int16_t check_neg(int16_t w){
 //	if(w >> 15 == 1){
 //
@@ -178,6 +179,8 @@ void selectPacket(int num){
 					case XYZ_MOVE:
 						updateJoint((int16_t)((serial->rPacket[12]<<8) + serial->rPacket[11]), (int16_t)((serial->rPacket[6]<<8) + serial->rPacket[5]), (int16_t)((serial->rPacket[8]<<8) + serial->rPacket[7]), (int16_t)((serial->rPacket[10]<<8) + serial->rPacket[9]));
 //						updateXYZ((serial->rPacket[6]<<8) + serial->rPacket[5], (serial->rPacket[8]<<8) + serial->rPacket[7], (serial->rPacket[10]<<8) + serial->rPacket[9]);
+						break;
+					case FIELD_MOVE:
 						break;
 					case GRIP_CHESS:
 						Servo_gripperChess(2, (serial->rPacket[12]<<8) + serial->rPacket[11]);
