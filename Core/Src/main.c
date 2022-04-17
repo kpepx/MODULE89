@@ -34,6 +34,7 @@
 #include "STEPPER.h"
 #include "Serial.h"
 #include "TASKSPACE.h"
+#include "forwardKinematic.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -214,11 +215,13 @@ int main(void)
   //Timer Interrupt Control
   HAL_TIM_Base_Start_IT(&htim5);
 
-  //PID Setup
+  //PID STEPPER Setup
   setupPID(1, 0.001, -50, 50, 0.5, 0, 0);
   setupPID(2, 0.001, -50, 50, 0.5, 0, 0);
   setupPID(3, 0.05, -800, 800, 1.0, 0, 0);
-  setupPID(4, 0.05, -800, 800, 1.0, 0, 0);
+
+  //PID Field Setup
+  setupPID(4, 0.05, -20, 20, 1.0, 0, 0);
 
   //Encoder Setup
   Encoder_Start(1, &htim1, TIM_CHANNEL_ALL);
@@ -245,7 +248,7 @@ int main(void)
 //	  Stepper_runStep(3);
 //	  Stepper_runStep(4);
 	  if(state){
-//		  run_tarjectory();
+		  update_FK_real();
 //		  updateJoint(0,0,0,0);
 		  Stepper_runStep(1);
 		  Stepper_runStep(2);

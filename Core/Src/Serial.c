@@ -6,6 +6,7 @@
 #include "Serial.h"
 #include "STEPPER.h"
 #include "TASKSPACE.h"
+#include "TRAJECTORY.h"
 
 serial_state Serials[NUM_SERIAL];
 
@@ -181,6 +182,7 @@ void selectPacket(int num){
 //						updateXYZ((serial->rPacket[6]<<8) + serial->rPacket[5], (serial->rPacket[8]<<8) + serial->rPacket[7], (serial->rPacket[10]<<8) + serial->rPacket[9]);
 						break;
 					case FIELD_MOVE:
+						update_circle((int16_t)((serial->rPacket[12]<<8) + serial->rPacket[11]), (int16_t)((serial->rPacket[6]<<8) + serial->rPacket[5]), (int16_t)((serial->rPacket[8]<<8) + serial->rPacket[7]), (int16_t)((serial->rPacket[10]<<8) + serial->rPacket[9]));
 						break;
 					case GRIP_CHESS:
 						Servo_gripperChess(2, (serial->rPacket[12]<<8) + serial->rPacket[11]);

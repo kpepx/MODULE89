@@ -1,0 +1,12 @@
+CHESS.c:12:6:updateChess	24	static
+CHESS.c:20:8:find_x	16	static
+CHESS.c:29:8:find_y	16	static
+CHESS.c:38:8:find_radius	32	static
+CHESS.c:43:8:find_degree	32	static
+CHESS.c:56:8:get_degree_chess	16	static
+CHESS.c:61:8:get_radius_circle	16	static
+CHESS.c:66:8:get_degree_field	16	static
+CHESS.c:72:8:get_real_degree_chess	16	static
+CHESS.c:76:6:set_field_zero	8	static
+CHESS.c:80:8:get_x_chess	24	static
+CHESS.c:85:8:get_y_chess	24	static

@@ -22,8 +22,15 @@
 typedef struct{
 	volatile double x_circle;
 	volatile double y_circle;
+	volatile double x_circle_target;
+	volatile double y_circle_target;
 	volatile double r_circle;
-	volatile double d_circle;
+	volatile double d_circle; //ref horizontal
+	volatile double w_circle;
+	volatile double t_circle;
+	volatile double t_sum_circle;
+	volatile double d_robot;
+
 
 }trajectory_state;
 
@@ -32,7 +39,7 @@ extern void trajectory(double qi, double qf, double qdi, double qdf, double qddi
           double qddf, double Tk, double *c0, double *c1, double *c2,
           double *c3, double *c4, double *c5, double *b_vmax);
 
-void update_circle(double x, double y, double r, double d);
+void update_circle(int32_t row, int32_t column, int32_t w, int32_t t);
 
 
 #endif /* __TRAJECTORY_H */

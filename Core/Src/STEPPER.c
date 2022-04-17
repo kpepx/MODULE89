@@ -165,7 +165,6 @@ void Stepper_runStep(int num){
 	stepper_state * stepper = &steppers[num];
 	Stepper_currentPosition(num);
 	Stepper_currentPosition_real(num);
-	update_FK_real();
 	if(stepper->status != SS_STOPPED){
 //		enable_Stepper_OE();
 		HAL_TIM_PWM_Start(stepper->STEP_TIMER, stepper->STEP_CHANNEL);
@@ -197,7 +196,7 @@ void Stepper_StartStop(int num, uint8_t j){
 void Stepper_updateHome(int num, int value){
 	stepper_state * stepper = &steppers[num];
 	if(stepper->home_status == 0){
-		Set_Encoder_Zero(num);
+		Set_Encoder_Zero(num, OFFSET);
 		stepper->home_status = value;
 		Stepper_DefaultState(num);
 		stepper -> status = SS_STARTING;
@@ -250,6 +249,7 @@ float_t Stepper_targetPosition_real(int num){
 	return stepper->targetPosition_real;
 }
 
+// convert encoder to degree and scalar
 float_t encoder_to_joint(int num, int32_t value){
 	//convert to mm or degree
 	float_t ans;
@@ -265,6 +265,7 @@ float_t encoder_to_joint(int num, int32_t value){
 	return ans;
 }
 
+// convert degree and scalar to encoder
 int32_t joint_to_encoder(int num, float_t value){
 	//convert to encoder count
 	int32_t ans;

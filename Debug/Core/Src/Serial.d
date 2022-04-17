@@ -41,7 +41,7 @@ Core/Src/Serial.o: ../Core/Src/Serial.c ../Core/Inc/Serial.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pcd.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_ll_usb.h \
  ../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_pcd_ex.h \
- ../Core/Inc/STEPPER.h ../Core/Inc/TASKSPACE.h
+ ../Core/Inc/STEPPER.h ../Core/Inc/TASKSPACE.h ../Core/Inc/TRAJECTORY.h
 
 ../Core/Inc/Serial.h:
 
@@ -132,3 +132,5 @@ Core/Src/Serial.o: ../Core/Src/Serial.c ../Core/Inc/Serial.h \
 ../Core/Inc/STEPPER.h:
 
 ../Core/Inc/TASKSPACE.h:
+
+../Core/Inc/TRAJECTORY.h:

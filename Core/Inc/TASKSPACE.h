@@ -39,8 +39,6 @@ double to_radian(double value);
 
 double to_degree(double value);
 
-void update_FK_real();
-
 void run_tarjectory();
 
 #endif /* __TASKSPACE_H */

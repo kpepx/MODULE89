@@ -62,7 +62,7 @@ typedef struct{
 
 	//GPIO pin
 	GPIO_TypeDef * DIR_GPIO;
-	uint16_t DIR_PIN;
+	volatile uint16_t DIR_PIN;
 
 	//Prescaller
 	volatile int32_t stepPrescaller;

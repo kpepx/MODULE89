@@ -30,6 +30,8 @@ typedef struct{
   /* Function Declarations */
 void forwardKinematic(const double q[4]);
 
+void update_FK_real();
+
 double get_fk_roll();
 
 double get_fk_X();

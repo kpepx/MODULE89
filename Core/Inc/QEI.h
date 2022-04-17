@@ -25,6 +25,6 @@ void Encoder_Start(int num, TIM_HandleTypeDef * qeiTimer, uint32_t qeiChannel);
 //Get Value from Encoder
 uint32_t Get_Value_Encoder(int num);
 
-void Set_Encoder_Zero(int num);
+void Set_Encoder_Zero(int num, int value);
 
 #endif /* __QEI_H */

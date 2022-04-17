@@ -10,9 +10,7 @@
 
 /* Include Files */
 #include "forwardKinematic.h"
-//#include "rt_nonfinite.h"
-//#include "rt_defines.h"
-//#include "rt_nonfinite.h"
+#include "STEPPER.h"
 #include <math.h>
 
 static fk_state fks[NUM_FK];
@@ -20,24 +18,28 @@ static fk_state fks[NUM_FK];
 void forwardKinematic(const double q[4])
 {
 	fk_state * fk = &fks[0];
-  double Rota_idx_1;
-  double Rota_tmp;
-  double Rota_tmp_tmp_tmp;
-  double eulShaped_idx_2;
-  Rota_tmp_tmp_tmp = q[0] + q[1];
-  Rota_idx_1 = Rota_tmp_tmp_tmp + q[3];
-  Rota_tmp = cos(Rota_idx_1);
-  Rota_idx_1 = sin(Rota_idx_1);
-  eulShaped_idx_2 = atan2(Rota_idx_1, Rota_tmp);
-  if (sqrt(Rota_tmp * Rota_tmp + Rota_idx_1 * Rota_idx_1) <
-      2.2204460492503131E-15) {
-    eulShaped_idx_2 = 0.0;
-  }
+	double Rota_idx_1;
+	double Rota_tmp;
+	double Rota_tmp_tmp_tmp;
+	double eulShaped_idx_2;
+	Rota_tmp_tmp_tmp = q[0] + q[1];
+	Rota_idx_1 = Rota_tmp_tmp_tmp + q[3];
+	Rota_tmp = cos(Rota_idx_1);
+	Rota_idx_1 = sin(Rota_idx_1);
+	eulShaped_idx_2 = atan2(Rota_idx_1, Rota_tmp);
+	if (sqrt(Rota_tmp * Rota_tmp + Rota_idx_1 * Rota_idx_1) <
+			2.2204460492503131E-15) {
+		eulShaped_idx_2 = 0.0;
+	}
+	fk->roll = eulShaped_idx_2; //radian
+	fk->X = 412.97 * cos(Rota_tmp_tmp_tmp) + 248.0 * cos(q[0]); //mm
+	fk->Y = 412.97 * sin(Rota_tmp_tmp_tmp) + 248.0 * sin(q[0]); //mm
+	fk->Z = 217.04 - q[2]; //mm
+}
 
-  fk->roll = eulShaped_idx_2; //radian
-  fk->X = 412.97 * cos(Rota_tmp_tmp_tmp) + 248.0 * cos(q[0]); //mm
-  fk->Y = 412.97 * sin(Rota_tmp_tmp_tmp) + 248.0 * sin(q[0]); //mm
-  fk->Z = 217.04 - q[2]; //mm
+void update_FK_real(){
+	double qi_all[4] = {to_radian((double)Stepper_currentPosition_real(1)), to_radian((double)Stepper_currentPosition_real(2)), (double)Stepper_currentPosition_real(3), to_radian((double)0.0)};
+	forwardKinematic(qi_all);
 }
 
 double get_fk_roll(){

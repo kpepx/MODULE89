@@ -8,7 +8,7 @@
 //Encoder TIM1 use for Joint 1
 //Encoder TIM3 use for Joint 2
 //Encoder TIM4 use for Joint 3
-//TIM2 is Spare
+//TIM2 is Spare use for encoder field
 
 static encoder_state encoders[NUM_ENCODER];
 
@@ -27,7 +27,7 @@ void Encoder_Start(int num, TIM_HandleTypeDef * qeiTimer, uint32_t qeiChannel){ 
 	encoder->QEI_TIMER = qeiTimer;
 	encoder->QEI_CHANNEL = qeiChannel;
 	enable_Encoder_OE();
-	Set_Encoder_Zero(num);
+	Set_Encoder_Zero(num, OFFSET);
 }
 
 uint32_t Get_Value_Encoder(int num){ //Read Encoder Select by input num
@@ -37,7 +37,7 @@ uint32_t Get_Value_Encoder(int num){ //Read Encoder Select by input num
 	}
 }
 
-void Set_Encoder_Zero(int num){
+void Set_Encoder_Zero(int num, int value){
 	encoder_state * encoder = &encoders[num];
-	__HAL_TIM_SET_COUNTER(encoder->QEI_TIMER, OFFSET);
+	__HAL_TIM_SET_COUNTER(encoder->QEI_TIMER, value);
 }
