@@ -6,6 +6,7 @@
 "./Core/Src/Serial.o"
 "./Core/Src/TASKSPACE.o"
 "./Core/Src/TRAJECTORY.o"
+"./Core/Src/TRAJECTORY_CIRCLE.o"
 "./Core/Src/cartesianJog.o"
 "./Core/Src/forwardKinematic.o"
 "./Core/Src/main.o"

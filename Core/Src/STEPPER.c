@@ -167,14 +167,18 @@ void Stepper_runStep(int num){
 	Stepper_currentPosition_real(num);
 	if(stepper->status != SS_STOPPED){
 //		enable_Stepper_OE();
-		HAL_TIM_PWM_Start(stepper->STEP_TIMER, stepper->STEP_CHANNEL);
-		if(stepper->home_status){
-			Stepper_Direction(stepper);
-			Stepper_SetStepTimer(stepper);
+		if(stepper->home_status == 0){
+			if(stepper->targetPosition - 4 <= stepper->currentPosition && stepper->currentPosition <= stepper->targetPosition + 4){
+				HAL_TIM_PWM_Stop(stepper->STEP_TIMER, stepper->STEP_CHANNEL);
+			}
+			else{
+				Stepper_Direction(stepper);
+				Stepper_SetStepTimer(stepper);
+				HAL_TIM_PWM_Start(stepper->STEP_TIMER, stepper->STEP_CHANNEL);
+			}
 			//HAL_TIM_PWM_Start(stepper->STEP_TIMER, stepper->STEP_CHANNEL);
 		}
 		else {
-
 		}
 	}
 	else{
@@ -193,13 +197,35 @@ void Stepper_StartStop(int num, uint8_t j){
 	}
 }
 
+stepper_status Stepper_status(int num){
+	stepper_state * stepper = &steppers[num];
+	return stepper->status;
+}
+
 void Stepper_updateHome(int num, int value){
 	stepper_state * stepper = &steppers[num];
-	if(stepper->home_status == 0){
-		Set_Encoder_Zero(num, OFFSET);
+	if(stepper->home_status == 1){
+		if(num == 1){
+			Set_Encoder_Zero(num, OFFSET1);
+			Stepper_StartStop(1, 0);
+		}
+		if(num == 2){
+			Set_Encoder_Zero(num, OFFSET2);
+			Stepper_StartStop(2, 0);
+		}
+		if(num == 3){
+			Set_Encoder_Zero(num, OFFSET3);
+			Stepper_StartStop(3, 0);
+		}
+////		if((HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_4) && HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_5) && HAL_GPIO_ReadPin(GPIOD, GPIO_PIN_6)) == 1){
+////			Stepper_StartStop(1, 1);
+////			Stepper_StartStop(2, 1);
+////			Stepper_StartStop(3, 1);
+////		}
+//		Set_Encoder_Zero(num, OFFSET);
 		stepper->home_status = value;
 		Stepper_DefaultState(num);
-		stepper -> status = SS_STARTING;
+//		stepper -> status = SS_STARTING;
 	}
 }
 
@@ -210,20 +236,21 @@ int8_t Stepper_Checkhome(int num){
 
 void Stepper_SetHome(int num, int dir, int on){
 	stepper_state * stepper = &steppers[num];
+	HAL_TIM_PWM_Start(stepper->STEP_TIMER, stepper->STEP_CHANNEL);
 	if(on){
 		if(num == 3){
-			stepper-> home_status = 0;
-			stepper->DIR_GPIO->BSRR = (uint32_t)stepper->DIR_PIN << (16U); //BSRR change pin to set/reset
+			stepper-> home_status = 1;
 			stepper -> STEP_TIMER -> Instance -> PSC = 25;
 			stepper -> STEP_TIMER -> Instance -> ARR = 64000;
 			stepper -> STEP_TIMER -> Instance -> CCR1 = 64000/2;
+			stepper->DIR_GPIO->BSRR = (uint32_t)stepper->DIR_PIN << (16U); //BSRR change pin to set/reset
 		}
 		else{
-			stepper-> home_status = 0;
-			stepper-> DIR_GPIO->BSRR = stepper->DIR_PIN; //BSRR change pin to set/reset
+			stepper-> home_status = 1;
 			stepper -> STEP_TIMER -> Instance -> PSC = 25;
 			stepper -> STEP_TIMER -> Instance -> ARR = 64000;
 			stepper -> STEP_TIMER -> Instance -> CCR1 = 64000/2;
+			stepper-> DIR_GPIO->BSRR = stepper->DIR_PIN; //BSRR change pin to set/reset
 		}
 	}
 }
@@ -279,4 +306,12 @@ int32_t joint_to_encoder(int num, float_t value){
 		ans = value*SCALAR_TO_ENCODER3;
 	}
 	return ans;
+}
+
+double to_degree(double value){
+	return value * 180.0 / M_PI;
+}
+
+double to_radian(double value){
+	return value * M_PI / 180.0;
 }

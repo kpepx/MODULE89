@@ -11,7 +11,7 @@
 
 #define NUM_STEPPER 5 // amount motor to used
 #define DEFAULT_MIN_SPEED 1
-#define DEFAULT_MAX_SPEED 400000
+#define DEFAULT_MAX_SPEED 40000
 #define ENCODER1_TO_ANGLE 36000.00/8071.00
 #define ANGLE_TO_ENCODER1 8071.00/36000.00
 #define ENCODER2_TO_ANGLE 36000.00/15369.00
@@ -22,6 +22,9 @@
 //#define SCALAR_TO_ENCODER 100/8192 //100 measure mm
 //#define ENCODER_TO_ANGLE 8192/36000 //8192 from encoder mode PPR x 4, 36000 from 360.00 degrees * 100
 //#define ENCODER_TO_SCALAR 8192/100 //100 measure mm
+#define OFFSET1 34070 // offset count encoder1
+#define OFFSET2 22510 // offset count encoder2
+#define OFFSET3 30000 // offset count encoder3
 #define OFFSET 30000 // offset count encoder
 //q1 encoder 8192 per 360 degree
 //q2 encoder 15369 per 360 degree
@@ -138,6 +141,8 @@ void Stepper_runStep(int num);
 
 void Stepper_StartStop(int num, uint8_t j);
 
+stepper_status Stepper_status(int num);
+
 void Stepper_updateHome(int num, int value);
 
 void Stepper_SetHome(int num, int dir, int on);
@@ -151,5 +156,9 @@ float_t Stepper_targetPosition_real(int num);
 float_t encoder_to_joint(int num, int32_t value);
 
 int32_t joint_to_encoder(int num, float_t value);
+
+double to_radian(double value);
+
+double to_degree(double value);
 
 #endif /* __STEPPER_H */

@@ -13,6 +13,7 @@ C_SRCS += \
 ../Core/Src/Serial.c \
 ../Core/Src/TASKSPACE.c \
 ../Core/Src/TRAJECTORY.c \
+../Core/Src/TRAJECTORY_CIRCLE.c \
 ../Core/Src/cartesianJog.c \
 ../Core/Src/forwardKinematic.c \
 ../Core/Src/main.c \
@@ -31,6 +32,7 @@ OBJS += \
 ./Core/Src/Serial.o \
 ./Core/Src/TASKSPACE.o \
 ./Core/Src/TRAJECTORY.o \
+./Core/Src/TRAJECTORY_CIRCLE.o \
 ./Core/Src/cartesianJog.o \
 ./Core/Src/forwardKinematic.o \
 ./Core/Src/main.o \
@@ -49,6 +51,7 @@ C_DEPS += \
 ./Core/Src/Serial.d \
 ./Core/Src/TASKSPACE.d \
 ./Core/Src/TRAJECTORY.d \
+./Core/Src/TRAJECTORY_CIRCLE.d \
 ./Core/Src/cartesianJog.d \
 ./Core/Src/forwardKinematic.d \
 ./Core/Src/main.d \
@@ -66,7 +69,7 @@ Core/Src/%.o: ../Core/Src/%.c Core/Src/subdir.mk
 clean: clean-Core-2f-Src
 
 clean-Core-2f-Src:
-	-$(RM) ./Core/Src/CHESS.d ./Core/Src/CHESS.o ./Core/Src/IK.d ./Core/Src/IK.o ./Core/Src/PID.d ./Core/Src/PID.o ./Core/Src/QEI.d ./Core/Src/QEI.o ./Core/Src/STEPPER.d ./Core/Src/STEPPER.o ./Core/Src/Serial.d ./Core/Src/Serial.o ./Core/Src/TASKSPACE.d ./Core/Src/TASKSPACE.o ./Core/Src/TRAJECTORY.d ./Core/Src/TRAJECTORY.o ./Core/Src/cartesianJog.d ./Core/Src/cartesianJog.o ./Core/Src/forwardKinematic.d ./Core/Src/forwardKinematic.o ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/stm32h7xx_hal_msp.d ./Core/Src/stm32h7xx_hal_msp.o ./Core/Src/stm32h7xx_it.d ./Core/Src/stm32h7xx_it.o ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/system_stm32h7xx.d ./Core/Src/system_stm32h7xx.o
+	-$(RM) ./Core/Src/CHESS.d ./Core/Src/CHESS.o ./Core/Src/IK.d ./Core/Src/IK.o ./Core/Src/PID.d ./Core/Src/PID.o ./Core/Src/QEI.d ./Core/Src/QEI.o ./Core/Src/STEPPER.d ./Core/Src/STEPPER.o ./Core/Src/Serial.d ./Core/Src/Serial.o ./Core/Src/TASKSPACE.d ./Core/Src/TASKSPACE.o ./Core/Src/TRAJECTORY.d ./Core/Src/TRAJECTORY.o ./Core/Src/TRAJECTORY_CIRCLE.d ./Core/Src/TRAJECTORY_CIRCLE.o ./Core/Src/cartesianJog.d ./Core/Src/cartesianJog.o ./Core/Src/forwardKinematic.d ./Core/Src/forwardKinematic.o ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/stm32h7xx_hal_msp.d ./Core/Src/stm32h7xx_hal_msp.o ./Core/Src/stm32h7xx_it.d ./Core/Src/stm32h7xx_it.o ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/system_stm32h7xx.d ./Core/Src/system_stm32h7xx.o
 
 .PHONY: clean-Core-2f-Src
 

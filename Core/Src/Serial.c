@@ -7,6 +7,7 @@
 #include "STEPPER.h"
 #include "TASKSPACE.h"
 #include "TRAJECTORY.h"
+#include "TRAJECTORY_CIRCLE.h"
 
 serial_state Serials[NUM_SERIAL];
 
@@ -69,6 +70,51 @@ void Servo_StartStop(int num, uint16_t value){
 	serial->address = START_STOP_MOVE;
 	serial->parameter[0] = SHIFT_TO_LSB(value);
 	serial->parameter[1] = SHIFT_TO_MSB(value);
+	iWrite(serial);
+	sendIPacket(serial);
+}
+
+void Feedback_Complete(int num, uint16_t value){
+	serial_state * serial = &Serials[num];
+	serial->length = 2;
+	serial->instruction = STATUS;
+	serial->address = FEEDBACK;
+	serial->parameter[0] = SHIFT_TO_LSB(value);
+	serial->parameter[1] = SHIFT_TO_MSB(value);
+	iWrite(serial);
+	sendIPacket(serial);
+}
+
+void Feedback_JOINT(int num, uint16_t q1, uint16_t q2, uint16_t q3, uint16_t q4){
+	serial_state * serial = &Serials[num];
+	serial->length = 8;
+	serial->instruction = STATUS;
+	serial->address = PRESENT_JOINT;
+	serial->parameter[0] = SHIFT_TO_LSB(q1);
+	serial->parameter[1] = SHIFT_TO_MSB(q1);
+	serial->parameter[2] = SHIFT_TO_LSB(q2);
+	serial->parameter[3] = SHIFT_TO_MSB(q2);
+	serial->parameter[4] = SHIFT_TO_LSB(q3);
+	serial->parameter[5] = SHIFT_TO_MSB(q3);
+	serial->parameter[6] = SHIFT_TO_LSB(q4);
+	serial->parameter[7] = SHIFT_TO_MSB(q4);
+	iWrite(serial);
+	sendIPacket(serial);
+}
+
+void Feedback_XYZ(int num, uint16_t x, uint16_t y, uint16_t z, uint16_t roll){
+	serial_state * serial = &Serials[num];
+	serial->length = 8;
+	serial->instruction = STATUS;
+	serial->address = PRESENT_XYZ;
+	serial->parameter[0] = SHIFT_TO_LSB(x);
+	serial->parameter[1] = SHIFT_TO_MSB(x);
+	serial->parameter[2] = SHIFT_TO_LSB(y);
+	serial->parameter[3] = SHIFT_TO_MSB(y);
+	serial->parameter[4] = SHIFT_TO_LSB(z);
+	serial->parameter[5] = SHIFT_TO_MSB(z);
+	serial->parameter[6] = SHIFT_TO_LSB(roll);
+	serial->parameter[7] = SHIFT_TO_MSB(roll);
 	iWrite(serial);
 	sendIPacket(serial);
 }
@@ -181,7 +227,7 @@ void selectPacket(int num){
 						updateJoint((int16_t)((serial->rPacket[12]<<8) + serial->rPacket[11]), (int16_t)((serial->rPacket[6]<<8) + serial->rPacket[5]), (int16_t)((serial->rPacket[8]<<8) + serial->rPacket[7]), (int16_t)((serial->rPacket[10]<<8) + serial->rPacket[9]));
 //						updateXYZ((serial->rPacket[6]<<8) + serial->rPacket[5], (serial->rPacket[8]<<8) + serial->rPacket[7], (serial->rPacket[10]<<8) + serial->rPacket[9]);
 						break;
-					case FIELD_MOVE:
+					case FIELD_PICK:
 						update_circle((int16_t)((serial->rPacket[12]<<8) + serial->rPacket[11]), (int16_t)((serial->rPacket[6]<<8) + serial->rPacket[5]), (int16_t)((serial->rPacket[8]<<8) + serial->rPacket[7]), (int16_t)((serial->rPacket[10]<<8) + serial->rPacket[9]));
 						break;
 					case GRIP_CHESS:

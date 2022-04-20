@@ -35,10 +35,6 @@ void updateXYZ(int32_t x, int32_t y, int32_t z);
 
 void updateJoint(int32_t roll, int32_t x, int32_t y, int32_t z);
 
-double to_radian(double value);
-
-double to_degree(double value);
-
 void run_tarjectory();
 
 #endif /* __TASKSPACE_H */

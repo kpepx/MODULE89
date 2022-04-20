@@ -17,13 +17,13 @@ void updateXYZ(int32_t x, int32_t y, int32_t z){
 //	taskspace_state * taskspace = &taskspaces[0];
 }
 
-double to_degree(double value){
-	return value * 180.0 / M_PI;
-}
-
-double to_radian(double value){
-	return value * M_PI / 180.0;
-}
+//double to_degree(double value){
+//	return value * 180.0 / M_PI;
+//}
+//
+//double to_radian(double value){
+//	return value * M_PI / 180.0;
+//}
 
 void updateJoint(int32_t roll, int32_t x, int32_t y, int32_t z){
 	taskspace_state * taskspace = &taskspaces[0];

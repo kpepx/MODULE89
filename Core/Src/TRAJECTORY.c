@@ -28,77 +28,58 @@ static trajectory_state trajectorys[NUM_TRAJECTORY];
  *                double *acc
  * Return Type  : void
  */
-void trajectory(double qi, double qf, double qdi, double qdf, double qddi,
-                double qddf, double Tk, double *c0, double *c1, double *c2,
-                double *c3, double *c4, double *c5, double *b_vmax)
+
+// num = 1 is x axis, num = 2 is y axis, num = 3 is z axis
+
+void trajectory(int num, double qi, double qf, double qdi, double qdf, double qddi, double qddf, double Tk, double Tsample)
 {
-  double b_c3_tmp;
-  double c3_tmp;
-  double c4_tmp;
-  double c_c3_tmp;
-  *c0 = qi;
-  *c1 = qdi;
-  *c2 = qddi / 2.0;
-  c3_tmp = Tk * Tk;
-  b_c3_tmp = 3.0 * c3_tmp * qddi;
-  c_c3_tmp = c3_tmp * qddf;
-  *c3 = -(((((20.0 * qi - 20.0 * qf) + 8.0 * Tk * qdf) + 12.0 * Tk * qdi) -
-           c_c3_tmp) + b_c3_tmp) / (2.0 * rt_powd_snf(Tk, 3.0));
-  c4_tmp = 14.0 * Tk * qdf;
-  *c4 = (((((30.0 * qi - 30.0 * qf) + c4_tmp) + 16.0 * Tk * qdi) - 2.0 * c3_tmp *
-          qddf) + b_c3_tmp) / (2.0 * rt_powd_snf(Tk, 4.0));
-  b_c3_tmp = c3_tmp * qddi;
-  *c5 = -(((((12.0 * qi - 12.0 * qf) + 6.0 * Tk * qdf) + 6.0 * Tk * qdi) -
-           c_c3_tmp) + b_c3_tmp) / (2.0 * rt_powd_snf(Tk, 5.0));
+	trajectory_state * trajectory = &trajectorys[num];
 
-  /*      pos = c0 + c1*T + c2*(T^2) + c3*(T^3) + c4*(T^4) + c5*(T^5); */
-  /*      vel = c1 + 2*c2*T + 3*c3*(T^2) + 4*c4*(T^3) + 5*c5*(T^4); */
-  /*      acc = 2*c2 + 6*c3*T + 12*c4*(T^2) + 20*c5*(T^3); */
-  *b_vmax = (((((60.0 * qf - 60.0 * qi) - c4_tmp) - 14.0 * Tk * qdi) + c_c3_tmp)
-             - b_c3_tmp) / 32.0 * Tk;
+	double b_c3_tmp;
+	double c3_tmp;
+	double c4_tmp;
+	double c_c3_tmp;
+
+	trajectory->Tk = Tk;
+	trajectory->Tsam = Tsample;
+	trajectory->c0 = qi;
+	trajectory->c1 = qdi;
+	trajectory->c2 = qddi / 2.0;
+	c3_tmp = Tk * Tk;
+	b_c3_tmp = 3.0 * c3_tmp * qddi;
+	c_c3_tmp = c3_tmp * qddf;
+	trajectory->c3 = -(((((20.0 * qi - 20.0 * qf) + 8.0 * Tk * qdf) + 12.0 * Tk * qdi) - c_c3_tmp) + b_c3_tmp) / (2.0 * pow(Tk, 3.0));
+	c4_tmp = 14.0 * Tk * qdf;
+	trajectory->c4 = (((((30.0 * qi - 30.0 * qf) + c4_tmp) + 16.0 * Tk * qdi) - 2.0 * c3_tmp * qddf) + b_c3_tmp) / (2.0 * pow(Tk, 4.0));
+	b_c3_tmp = c3_tmp * qddi;
+	trajectory->c5 = -(((((12.0 * qi - 12.0 * qf) + 6.0 * Tk * qdf) + 6.0 * Tk * qdi) - c_c3_tmp) + b_c3_tmp) / (2.0 * pow(Tk, 5.0));
+
+	trajectory->vmax = (((((60.0 * qf - 60.0 * qi) - c4_tmp) - 14.0 * Tk * qdi) + c_c3_tmp) - b_c3_tmp) / 32.0 * Tk;
+	trajectory->state = 1;
+	Stepper_StartStop(num, 1);
 }
 
-void update_circle(int32_t row, int32_t column, int32_t w, int32_t t){
-	trajectory_state * trajectory = &trajectorys[0];
+void run_trajectory(int num){
+	trajectory_state * trajectory = &trajectorys[num];
+	if(trajectory->state){
+		if(Stepper_status(num) != 0x80){
+			trajectory->T += trajectory->Tsam;
+			trajectory->pos = trajectory->c0 + trajectory->c1*trajectory->T + trajectory->c2*pow(trajectory->T, 2.00) + trajectory->c3*pow(trajectory->T, 3.00) + trajectory->c4*pow(trajectory->T, 4.00) + trajectory->c5*pow(trajectory->T, 5.00);
+			trajectory->vel = trajectory->c1 + 2*trajectory->c2*trajectory->T + 3*trajectory->c3*pow(trajectory->T, 2.00) + 4*trajectory->c4*pow(trajectory->T, 3.00) + 5*trajectory->c5*pow(trajectory->T, 4.00);
+			trajectory->acc = 2*trajectory->c2 + 6*trajectory->c3*trajectory->T + 12*trajectory->c4*pow(trajectory->T, 2.00) + 20*trajectory->c5*pow(trajectory->T, 3.00);
+		}
 
-	updateChess(row, column);
-
-	trajectory->x_circle = 200.00;
-	trajectory->y_circle = 200.00;
-	trajectory->r_circle = get_radius_circle();
-	trajectory->w_circle = w/100.00;
-	trajectory->t_circle = t/10000.00;
-	trajectory->d_circle = get_degree_chess();
+	}
+	if(trajectory->T >= trajectory->Tk){
+		trajectory->T = 0;
+		Stepper_StartStop(num, 0);
+	}
 }
 
-void run_trajectory_circle(){
-	trajectory_state * trajectory = &trajectorys[0];
-
-//	trajectory->d_robot = find_degree(trajectory->x_circle_target, trajectory->y_circle_target); //real robot position
-//	double degree_field = get_real_degree_chess(); //real chess position
-
-	double real_x_chess = trajectory->x_circle + get_x_chess();
-	double real_y_chess = trajectory->y_circle + get_y_chess();
-
-	double dx = real_x_chess - trajectory->x_circle_target;
-	double dy = real_y_chess - trajectory->y_circle_target;
-	double euclidean_distance = sqrt(pow(dx, 2) + pow(dy, 2));
-	double degree = asin(euclidean_distance/(2*trajectory->r_circle))*2;
-
-	trajectory->t_sum_circle += trajectory->t_circle*degree;
-
-	double d = trajectory->d_circle * (M_PI/180.00);
-	trajectory->x_circle_target = trajectory->x_circle + trajectory->r_circle*cos(trajectory->w_circle*trajectory->t_sum_circle + d);
-	trajectory->y_circle_target = trajectory->y_circle + trajectory->r_circle*sin(trajectory->w_circle*trajectory->t_sum_circle + d);
-
-	double xyz[3] = {trajectory->x_circle_target, trajectory->y_circle_target, 0};
-	IK(xyz, 0, 1);
-
-	//run actuator
-	Stepper_SetTraget(1, to_degree(get_ik_q1()));
-	Stepper_SetTraget(2, to_degree(get_ik_q2()));
-	Stepper_SetTraget(3, get_ik_q3());
-	Servo_tragetPos(2, to_degree(get_ik_q4()));
+void reset_trajectory(int num){
+	trajectory_state * trajectory = &trajectorys[num];
+	trajectory->T = 0;
+	trajectory->state = 0;
 }
 
 /*

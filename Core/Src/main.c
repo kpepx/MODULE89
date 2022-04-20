@@ -104,7 +104,6 @@ PCD_HandleTypeDef hpcd_USB_OTG_FS;
 uint32_t STEP_TIMER_CLOCK;
 uint32_t STEP_CONTROLLER_PERIOD_US;
 uint32_t state = 0;
-int a = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -217,7 +216,7 @@ int main(void)
 
   //PID STEPPER Setup
   setupPID(1, 0.001, -50, 50, 0.5, 0, 0);
-  setupPID(2, 0.001, -50, 50, 0.5, 0, 0);
+  setupPID(2, 0.001, -35, 35, 0.5, 0, 0);
   setupPID(3, 0.05, -800, 800, 1.0, 0, 0);
 
   //PID Field Setup
@@ -233,28 +232,28 @@ int main(void)
   Serial_Setup(1, &huart5);
   Serial_Setup(2, &huart7);
 
-  Stepper_updateHome(1, 1);
-  Stepper_updateHome(2, 1);
-  Stepper_updateHome(3, 1);
+//  Stepper_updateHome(1, 1);
+//  Stepper_updateHome(2, 1);
+//  Stepper_updateHome(3, 1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-//	  a = HAL_GPIO_ReadPin(PROXIMITY2_GPIO_Port, PROXIMITY2_Pin);
-//	  Stepper_runStep(1);
-//	  Stepper_runStep(2);
-//	  Stepper_runStep(3);
-//	  Stepper_runStep(4);
 	  if(state){
 		  update_FK_real();
+//		  Feedback_XYZ(1, get_fk_X(), get_fk_Y(), get_fk_Z(), get_fk_roll());
+//		  Feedback_JOINT(1, , q2, q3, q4);
 //		  updateJoint(0,0,0,0);
 		  Stepper_runStep(1);
 		  Stepper_runStep(2);
 		  Stepper_runStep(3);
 //		  Stepper_runStep(4);
 		  state = 0;
+//		  a1 = HAL_GPIO_ReadPin(PROXIMITY1_GPIO_Port, PROXIMITY1_Pin);
+//		  a2 = HAL_GPIO_ReadPin(PROXIMITY2_GPIO_Port, PROXIMITY2_Pin);
+//		  a3 = HAL_GPIO_ReadPin(PROXIMITY3_GPIO_Port, PROXIMITY3_Pin);
 	  }
 	  selectPacket(1);
 
@@ -1260,15 +1259,15 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
     if(GPIO_Pin == GPIO_PIN_4) // If The INT Source Is EXTI Line9 (A9 Pin)
     {
-    	Stepper_updateHome(1, 1);
+    	Stepper_updateHome(1, 0);
     }
     if(GPIO_Pin == GPIO_PIN_5) // If The INT Source Is EXTI Line9 (A9 Pin)
     {
-    	Stepper_updateHome(2, 1);
+    	Stepper_updateHome(2, 0);
     }
     if(GPIO_Pin == GPIO_PIN_6) // If The INT Source Is EXTI Line9 (A9 Pin)
     {
-    	Stepper_updateHome(3, 1);
+    	Stepper_updateHome(3, 0);
     }
 }
 

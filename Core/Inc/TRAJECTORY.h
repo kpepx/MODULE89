@@ -17,29 +17,23 @@
 
 #include "stm32h7xx_hal.h"
 
-#define NUM_TRAJECTORY 1
+#define NUM_TRAJECTORY 4
 
 typedef struct{
-	volatile double x_circle;
-	volatile double y_circle;
-	volatile double x_circle_target;
-	volatile double y_circle_target;
-	volatile double r_circle;
-	volatile double d_circle; //ref horizontal
-	volatile double w_circle;
-	volatile double t_circle;
-	volatile double t_sum_circle;
-	volatile double d_robot;
-
+	volatile double c0, c1, c2, c3, c4, c5;
+	volatile double vmax;
+	volatile double Tk, Tsam, T;
+	volatile int state;
+	volatile double pos, vel, acc;
 
 }trajectory_state;
 
   /* Function Declarations */
-extern void trajectory(double qi, double qf, double qdi, double qdf, double qddi,
-          double qddf, double Tk, double *c0, double *c1, double *c2,
-          double *c3, double *c4, double *c5, double *b_vmax);
+extern void trajectory(int num, double qi, double qf, double qdi, double qdf, double qddi, double qddf, double Tk, double Tsample);
 
-void update_circle(int32_t row, int32_t column, int32_t w, int32_t t);
+void run_trajectory(int num);
+
+void reset_trajectory(int num);
 
 
 #endif /* __TRAJECTORY_H */
