@@ -1,5 +1,6 @@
 "./Core/Src/CHESS.o"
 "./Core/Src/IK.o"
+"./Core/Src/PATH.o"
 "./Core/Src/PID.o"
 "./Core/Src/QEI.o"
 "./Core/Src/STEPPER.o"

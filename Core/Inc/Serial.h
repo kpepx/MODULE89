@@ -49,9 +49,8 @@
 #define GRIP_CHESS             0x14
 #define PRESENT_JOINT          0x15
 #define PRESENT_XYZ            0x16
-#define FIELD_PICK             0x17
-#define FIELD_PLACE            0x18
-#define FEEDBACK			   0x19
+#define FIELD_CHESS            0x17
+#define FEEDBACK			   0x18
 
 //Servo Board
 #define SERVO_JOINT			   0x20
@@ -91,7 +90,9 @@ void Servo_gripperChess(int num, uint16_t value);
 
 void Servo_tragetPos(int num, uint16_t pos);
 
-void Servo_StartStop(int num, uint16_t value);
+void Servo_StartStop(int num, uint16_t value1, uint16_t value2);
+
+void Feedback_Complete(int num, uint16_t value);
 
 void Feedback_JOINT(int num, uint16_t q1, uint16_t q2, uint16_t q3, uint16_t q4);
 

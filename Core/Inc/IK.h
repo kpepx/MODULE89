@@ -17,7 +17,7 @@
 #include <stdlib.h>
 #include "stm32h7xx_hal.h"
 
-#define NUM_IK 1
+#define NUM_IK 2
 
 typedef struct{
   volatile double q1;
@@ -29,15 +29,15 @@ typedef struct{
 }ik_state;
 
 /* Function Declarations */
-void IK(double pos[3], double oriz, double gram);
+void IK(int num, double pos[3], double oriz, double gram);
 
-double get_ik_q1();
+double get_ik_q1(int num);
 
-double get_ik_q2();
+double get_ik_q2(int num);
 
-double get_ik_q3();
+double get_ik_q3(int num);
 
-double get_ik_q4();
+double get_ik_q4(int num);
 
 #endif /* __IK_H */
 

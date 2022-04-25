@@ -27,9 +27,9 @@
 
 static ik_state iks[NUM_IK];
 
-void IK(double pos[3], double oriz, double gram)
+void IK(int num, double pos[3], double oriz, double gram)
 {
-	ik_state * ik = &iks[0];
+	ik_state * ik = &iks[num];
   double c2;
   double q2;
   double s2;
@@ -52,23 +52,23 @@ void IK(double pos[3], double oriz, double gram)
   }
 }
 
-double get_ik_q1(){
-	ik_state * ik = &iks[0];
+double get_ik_q1(int num){
+	ik_state * ik = &iks[num];
 	return ik->q1;
 }
 
-double get_ik_q2(){
-	ik_state * ik = &iks[0];
+double get_ik_q2(int num){
+	ik_state * ik = &iks[num];
 	return ik->q2;
 }
 
-double get_ik_q3(){
-	ik_state * ik = &iks[0];
+double get_ik_q3(int num){
+	ik_state * ik = &iks[num];
 	return ik->q3;
 }
 
-double get_ik_q4(){
-	ik_state * ik = &iks[0];
+double get_ik_q4(int num){
+	ik_state * ik = &iks[num];
 	return ik->q4;
 }
 

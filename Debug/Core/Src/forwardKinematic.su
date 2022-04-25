@@ -1,6 +1,7 @@
 forwardKinematic.c:18:6:forwardKinematic	64	static
-forwardKinematic.c:40:6:update_FK_real	40	static
-forwardKinematic.c:45:8:get_fk_roll	16	static
-forwardKinematic.c:50:8:get_fk_X	16	static
-forwardKinematic.c:55:8:get_fk_Y	16	static
-forwardKinematic.c:60:8:get_fk_Z	16	static
+forwardKinematic.c:40:6:update_FK_real	48	static
+forwardKinematic.c:45:6:update_FK_Target	48	static
+forwardKinematic.c:50:8:get_fk_roll	24	static
+forwardKinematic.c:55:8:get_fk_X	24	static
+forwardKinematic.c:60:8:get_fk_Y	24	static
+forwardKinematic.c:65:8:get_fk_Z	24	static

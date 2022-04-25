@@ -82,8 +82,8 @@ void run_tarjectory(){
 //	double y_target = get_fk_Y() - cos(2*0.0001)*10;
 	double xyz[3] = {x_target, y_target, 0};
 
-	IK(xyz, 0, 1);
-	Stepper_SetTraget(1, to_degree(get_ik_q1()));
-	Stepper_SetTraget(2, to_degree(get_ik_q2()));
+	IK(0, xyz, 0, 1);
+	Stepper_SetTraget(1, to_degree(get_ik_q1(0)));
+	Stepper_SetTraget(2, to_degree(get_ik_q2(0)));
 }
 

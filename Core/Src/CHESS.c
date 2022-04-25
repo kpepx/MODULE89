@@ -11,28 +11,30 @@ static chess_state chesss[NUM_CHESS];
 
 void updateChess(int32_t row, int32_t column){
 	chess_state * chess = &chesss[0];
-	chess->x_chess = find_x(row);
-	chess->y_chess = find_y(column);
+	chess->x_chess = find_x(column);
+	chess->y_chess = find_y(row);
 	chess->r = find_radius(chess->x_chess, chess->y_chess);
 	chess->degree_chess = find_degree(chess->x_chess, chess->y_chess);
 }
 
-double find_x(int32_t row){
-	if(row <= 4){
-		return (-((5 - row)*L)/8.00) + (s/2.00);
-	}
-	else if(row >= 5){
-		return (((row - 4)*L)/8.00) - (s/2.00);
-	}
+double find_y(int32_t row){
+//	if(row <= 4){
+//		return (-((5 - row)*L)/8.00) + (s/2.00);
+//	}
+//	else if(row >= 5){
+//		return (((row - 4)*L)/8.00) - (s/2.00);
+//	}
+	return (((4.50 - row)*L)/8.00);
 }
 
-double find_y(int32_t column){
-	if(column <= 4){
-		return (-((5 - column)*L)/8.00) + (s/2.00);
-	}
-	else if(column >= 5){
-		return (((column - 4)*L)/8.00) - (s/2.00);
-	}
+double find_x(int32_t column){
+//	if(column <= 4){
+//		return (-((5 - column)*L)/8.00) + (s/2.00);
+//	}
+//	else if(column >= 5){
+//		return (((column - 4)*L)/8.00) - (s/2.00);
+//	}
+	return ((column - 4.50)*L)/8.00;
 }
 
 double find_radius(double x, double y){
@@ -42,9 +44,10 @@ double find_radius(double x, double y){
 //ref 0 degree
 double find_degree(double x, double y){
 	double d = atan2(y, x) * (180.00/M_PI);
-	if(x < 0 && y < 0){return 360.00 + d;}
+	if(x >= 0 && y >= 0){return d;}
+	else if(x < 0 && y >= 0){return d;}
+	else if(x < 0 && y < 0){return 360.00 + d;}
 	else if(x >= 0 && y < 0){return 360.00 + d;}
-	else{return d;}
 
 //    double d = atan(y/x)*(180.00/M_PI);
 //    if(x >= 0 && y >= 0){return d;}
@@ -70,7 +73,7 @@ double get_degree_field(){
 }
 
 double get_real_degree_chess(){
-	return ((int)((get_degree_field() + get_degree_chess())*100.00) % 36000)/100.00;
+	return get_degree_field() + get_degree_chess();
 }
 
 void set_field_zero(){
@@ -79,11 +82,11 @@ void set_field_zero(){
 
 double get_x_chess(){
 	chess_state * chess = &chesss[0];
-	return chess->r * cos(get_real_degree_chess());
+	return chess->r * cos((get_real_degree_chess()*M_PI)/180.00);
 }
 
 double get_y_chess(){
 	chess_state * chess = &chesss[0];
-	return chess->r * sin(get_real_degree_chess());
+	return chess->r * sin((get_real_degree_chess()*M_PI)/180.00);
 }
 

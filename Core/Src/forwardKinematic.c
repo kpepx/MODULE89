@@ -15,9 +15,9 @@
 
 static fk_state fks[NUM_FK];
 
-void forwardKinematic(const double q[4])
+void forwardKinematic(int num, const double q[4])
 {
-	fk_state * fk = &fks[0];
+	fk_state * fk = &fks[num];
 	double Rota_idx_1;
 	double Rota_tmp;
 	double Rota_tmp_tmp_tmp;
@@ -37,28 +37,33 @@ void forwardKinematic(const double q[4])
 	fk->Z = 217.04 - q[2]; //mm
 }
 
-void update_FK_real(){
+void update_FK_real(int num){
 	double qi_all[4] = {to_radian((double)Stepper_currentPosition_real(1)), to_radian((double)Stepper_currentPosition_real(2)), (double)Stepper_currentPosition_real(3), to_radian((double)0.0)};
-	forwardKinematic(qi_all);
+	forwardKinematic(num, qi_all);
 }
 
-double get_fk_roll(){
-	fk_state * fk = &fks[0];
+void update_FK_Target(int num){
+	double qi_all[4] = {to_radian((double)Stepper_targetPosition_real(1)), to_radian((double)Stepper_targetPosition_real(2)), (double)Stepper_targetPosition_real(3), to_radian((double)0.0)};
+	forwardKinematic(num, qi_all);
+}
+
+double get_fk_roll(int num){
+	fk_state * fk = &fks[num];
 	return fk->roll;
 }
 
-double get_fk_X(){
-	fk_state * fk = &fks[0];
+double get_fk_X(int num){
+	fk_state * fk = &fks[num];
 	return fk->X;
 }
 
-double get_fk_Y(){
-	fk_state * fk = &fks[0];
+double get_fk_Y(int num){
+	fk_state * fk = &fks[num];
 	return fk->Y;
 }
 
-double get_fk_Z(){
-	fk_state * fk = &fks[0];
+double get_fk_Z(int num){
+	fk_state * fk = &fks[num];
 	return fk->Z;
 }
 

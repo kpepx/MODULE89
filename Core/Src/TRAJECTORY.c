@@ -11,11 +11,8 @@
 /* Include Files */
 #include "TRAJECTORY.h"
 #include "STEPPER.h"
-#include "CHESS.h"
 #include "IK.h"
 #include <math.h>
-#include "PID.h"
-#include "Serial.h"
 
 static trajectory_state trajectorys[NUM_TRAJECTORY];
 
@@ -40,6 +37,7 @@ void trajectory(int num, double qi, double qf, double qdi, double qdf, double qd
 	double c4_tmp;
 	double c_c3_tmp;
 
+	reset_trajectory(num);
 	trajectory->Tk = Tk;
 	trajectory->Tsam = Tsample;
 	trajectory->c0 = qi;
@@ -56,23 +54,25 @@ void trajectory(int num, double qi, double qf, double qdi, double qdf, double qd
 
 	trajectory->vmax = (((((60.0 * qf - 60.0 * qi) - c4_tmp) - 14.0 * Tk * qdi) + c_c3_tmp) - b_c3_tmp) / 32.0 * Tk;
 	trajectory->state = 1;
+	trajectory->check = 0;
 	Stepper_StartStop(num, 1);
 }
 
 void run_trajectory(int num){
 	trajectory_state * trajectory = &trajectorys[num];
 	if(trajectory->state){
+		if(trajectory->T >= trajectory->Tk){
+			trajectory->T = 0;
+			trajectory->state = 0;
+			trajectory->check = 1;
+			Stepper_StartStop(num, 0);
+		}
 		if(Stepper_status(num) != 0x80){
 			trajectory->T += trajectory->Tsam;
 			trajectory->pos = trajectory->c0 + trajectory->c1*trajectory->T + trajectory->c2*pow(trajectory->T, 2.00) + trajectory->c3*pow(trajectory->T, 3.00) + trajectory->c4*pow(trajectory->T, 4.00) + trajectory->c5*pow(trajectory->T, 5.00);
 			trajectory->vel = trajectory->c1 + 2*trajectory->c2*trajectory->T + 3*trajectory->c3*pow(trajectory->T, 2.00) + 4*trajectory->c4*pow(trajectory->T, 3.00) + 5*trajectory->c5*pow(trajectory->T, 4.00);
 			trajectory->acc = 2*trajectory->c2 + 6*trajectory->c3*trajectory->T + 12*trajectory->c4*pow(trajectory->T, 2.00) + 20*trajectory->c5*pow(trajectory->T, 3.00);
 		}
-
-	}
-	if(trajectory->T >= trajectory->Tk){
-		trajectory->T = 0;
-		Stepper_StartStop(num, 0);
 	}
 }
 
@@ -80,6 +80,17 @@ void reset_trajectory(int num){
 	trajectory_state * trajectory = &trajectorys[num];
 	trajectory->T = 0;
 	trajectory->state = 0;
+	trajectory->check = 0;
+}
+
+double get_pos(int num){
+	trajectory_state * trajectory = &trajectorys[num];
+	return trajectory->pos;
+}
+
+int get_check_trajectory(int num){
+	trajectory_state * trajectory = &trajectorys[num];
+	return trajectory->check;
 }
 
 /*

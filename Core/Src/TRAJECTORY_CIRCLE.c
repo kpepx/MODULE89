@@ -58,13 +58,13 @@ void run_trajectory_circle(){
 		trajectory_circle->y_circle_target = trajectory_circle->y_circle + trajectory_circle->r_circle*sin(trajectory_circle->w_circle*trajectory_circle->t_sum_circle + d);
 
 		double xyz[3] = {trajectory_circle->x_circle_target, trajectory_circle->y_circle_target, trajectory_circle->z_robot};
-		IK(xyz, 0, 1);
+		IK(0, xyz, 0, 1);
 
 		//run actuator
-		Stepper_SetTraget(1, to_degree(get_ik_q1()));
-		Stepper_SetTraget(2, to_degree(get_ik_q2()));
-		Stepper_SetTraget(3, get_ik_q3());
-		Servo_tragetPos(2, to_degree(get_ik_q4()));
+		Stepper_SetTraget(1, to_degree(get_ik_q1(0)));
+		Stepper_SetTraget(2, to_degree(get_ik_q2(0)));
+		Stepper_SetTraget(3, get_ik_q3(0));
+		Servo_tragetPos(2, to_degree(get_ik_q4(0))*100.00);
 	}
 }
 

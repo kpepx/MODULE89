@@ -1,0 +1,3 @@
+PATH.c:22:6:path	48	static
+PATH.c:41:8:find_time	32	static
+PATH.c:45:6:update_path	80	static

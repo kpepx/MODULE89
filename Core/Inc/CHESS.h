@@ -11,7 +11,7 @@
 #define NUM_CHESS 2
 #define L 400.00
 #define s 50.00
-#define ENCODER_TO_ANGLE 36000.00/10000.00
+#define ENCODER_TO_ANGLE 36000.00/2000.00
 
 typedef struct{
 	volatile double degree_chess;

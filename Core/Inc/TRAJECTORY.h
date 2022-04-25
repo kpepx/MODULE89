@@ -23,7 +23,7 @@ typedef struct{
 	volatile double c0, c1, c2, c3, c4, c5;
 	volatile double vmax;
 	volatile double Tk, Tsam, T;
-	volatile int state;
+	volatile int state, check;
 	volatile double pos, vel, acc;
 
 }trajectory_state;
@@ -35,6 +35,9 @@ void run_trajectory(int num);
 
 void reset_trajectory(int num);
 
+double get_pos(int num);
+
+int get_check_trajectory(int num);
 
 #endif /* __TRAJECTORY_H */
 

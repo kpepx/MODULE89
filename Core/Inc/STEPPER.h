@@ -22,8 +22,8 @@
 //#define SCALAR_TO_ENCODER 100/8192 //100 measure mm
 //#define ENCODER_TO_ANGLE 8192/36000 //8192 from encoder mode PPR x 4, 36000 from 360.00 degrees * 100
 //#define ENCODER_TO_SCALAR 8192/100 //100 measure mm
-#define OFFSET1 34070 // offset count encoder1
-#define OFFSET2 22510 // offset count encoder2
+#define OFFSET1 34069 // offset count encoder1
+#define OFFSET2 22420 // offset count encoder2
 #define OFFSET3 30000 // offset count encoder3
 #define OFFSET 30000 // offset count encoder
 //q1 encoder 8192 per 360 degree

@@ -63,13 +63,13 @@ void Servo_tragetPos(int num, uint16_t pos){
 	sendIPacket(serial);
 }
 
-void Servo_StartStop(int num, uint16_t value){
+void Servo_StartStop(int num, uint16_t value1, uint16_t value2){
 	serial_state * serial = &Serials[num];
 	serial->length = 2;
 	serial->instruction = WRITE_DATA;
 	serial->address = START_STOP_MOVE;
-	serial->parameter[0] = SHIFT_TO_LSB(value);
-	serial->parameter[1] = SHIFT_TO_MSB(value);
+	serial->parameter[0] = value1;
+	serial->parameter[1] = value2;
 	iWrite(serial);
 	sendIPacket(serial);
 }
@@ -150,6 +150,7 @@ void iWrite(serial_state * serial){
 
 void sendIPacket(serial_state * serial){
 	HAL_UART_Transmit(serial->UART_NAME, &serial->iPacket, serial->iPacketLength, 10);
+//	HAL_UART_Transmit_DMA(serial->UART_NAME, &serial->iPacket, serial->iPacketLength);
 }
 
 //void getRPacket(int num){
@@ -207,13 +208,18 @@ void selectPacket(int num){
 						Stepper_SetHome(1, 0, (serial->rPacket[6]<<8) + serial->rPacket[5]);
 						Stepper_SetHome(2, 0, (serial->rPacket[8]<<8) + serial->rPacket[7]);
 						Stepper_SetHome(3, 0, (serial->rPacket[10]<<8) + serial->rPacket[9]);
+						Servo_tragetPos(2, 0);
+						Servo_gripperChess(2, 0);
+						reset_trajectory(1);
+						reset_trajectory(2);
+						reset_trajectory(3);
 						//servo home
 						break;
 					case START_STOP_MOVE:
 						Stepper_StartStop(1, (serial->rPacket[6]<<8) + serial->rPacket[5]);
 						Stepper_StartStop(2, (serial->rPacket[8]<<8) + serial->rPacket[7]);
 						Stepper_StartStop(3, (serial->rPacket[10]<<8) + serial->rPacket[9]);
-						Servo_StartStop(2, (serial->rPacket[12]<<8) + serial->rPacket[11]);
+						Servo_StartStop(2, serial->rPacket[11], serial->rPacket[12]);
 						break;
 					case JOINT_MOVE:
 						Stepper_SetTraget(1, ((float_t)(int16_t)((serial->rPacket[6]<<8) + serial->rPacket[5]))/100.00);
@@ -227,8 +233,9 @@ void selectPacket(int num){
 						updateJoint((int16_t)((serial->rPacket[12]<<8) + serial->rPacket[11]), (int16_t)((serial->rPacket[6]<<8) + serial->rPacket[5]), (int16_t)((serial->rPacket[8]<<8) + serial->rPacket[7]), (int16_t)((serial->rPacket[10]<<8) + serial->rPacket[9]));
 //						updateXYZ((serial->rPacket[6]<<8) + serial->rPacket[5], (serial->rPacket[8]<<8) + serial->rPacket[7], (serial->rPacket[10]<<8) + serial->rPacket[9]);
 						break;
-					case FIELD_PICK:
-						update_circle((int16_t)((serial->rPacket[12]<<8) + serial->rPacket[11]), (int16_t)((serial->rPacket[6]<<8) + serial->rPacket[5]), (int16_t)((serial->rPacket[8]<<8) + serial->rPacket[7]), (int16_t)((serial->rPacket[10]<<8) + serial->rPacket[9]));
+					case FIELD_CHESS:
+						path((int16_t)((serial->rPacket[6]<<8) + serial->rPacket[5]), (int16_t)((serial->rPacket[8]<<8) + serial->rPacket[7]), (int16_t)((serial->rPacket[10]<<8) + serial->rPacket[9]));
+//						update_circle((int16_t)((serial->rPacket[12]<<8) + serial->rPacket[11]), (int16_t)((serial->rPacket[6]<<8) + serial->rPacket[5]), (int16_t)((serial->rPacket[8]<<8) + serial->rPacket[7]), (int16_t)((serial->rPacket[10]<<8) + serial->rPacket[9]));
 						break;
 					case GRIP_CHESS:
 						Servo_gripperChess(2, (serial->rPacket[12]<<8) + serial->rPacket[11]);

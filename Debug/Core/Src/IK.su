@@ -1,5 +1,5 @@
 IK.c:30:6:IK	72	static
-IK.c:55:8:get_ik_q1	16	static
-IK.c:60:8:get_ik_q2	16	static
-IK.c:65:8:get_ik_q3	16	static
-IK.c:70:8:get_ik_q4	16	static
+IK.c:55:8:get_ik_q1	24	static
+IK.c:60:8:get_ik_q2	24	static
+IK.c:65:8:get_ik_q3	24	static
+IK.c:70:8:get_ik_q4	24	static

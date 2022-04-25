@@ -17,7 +17,7 @@
 #include <stdlib.h>
 #include "stm32h7xx_hal.h"
 
-#define NUM_FK 1
+#define NUM_FK 2
 
 typedef struct{
   volatile double roll;
@@ -28,17 +28,19 @@ typedef struct{
 }fk_state;
 
   /* Function Declarations */
-void forwardKinematic(const double q[4]);
+void forwardKinematic(int num, const double q[4]);
 
-void update_FK_real();
+void update_FK_real(int num);
 
-double get_fk_roll();
+void update_FK_Target(int num);
 
-double get_fk_X();
+double get_fk_roll(int num);
 
-double get_fk_Y();
+double get_fk_X(int num);
 
-double get_fk_Z();
+double get_fk_Y(int num);
+
+double get_fk_Z(int num);
 
 #endif
 

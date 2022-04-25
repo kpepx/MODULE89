@@ -35,6 +35,8 @@
 #include "Serial.h"
 #include "TASKSPACE.h"
 #include "forwardKinematic.h"
+#include "PATH.h"
+#include "CHESS.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -104,6 +106,8 @@ PCD_HandleTypeDef hpcd_USB_OTG_FS;
 uint32_t STEP_TIMER_CLOCK;
 uint32_t STEP_CONTROLLER_PERIOD_US;
 uint32_t state = 0;
+uint32_t time = 0;
+double encoder_field = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -190,15 +194,26 @@ int main(void)
   //htim12 stepper 4
 
   //Stepper Setup
-  Stepper_Setup(1, &htim16, TIM_CHANNEL_1, DIR1_GPIO_Port, DIR1_Pin, 0);
-  Stepper_SetMinPosition(1, -360.00);
-  Stepper_SetMaxPosition(1, 360.00);
+//  Stepper_Setup(1, &htim16, TIM_CHANNEL_1, DIR1_GPIO_Port, DIR1_Pin, 0);
+//  Stepper_SetMinPosition(1, -360.00);
+//  Stepper_SetMaxPosition(1, 360.00);
+//  Stepper_Setup(2, &htim17, TIM_CHANNEL_1, DIR2_GPIO_Port, DIR2_Pin, 0);
+//  Stepper_SetMinPosition(2, -360.00);
+//  Stepper_SetMaxPosition(2, 360.00);
+//  Stepper_Setup(3, &htim13, TIM_CHANNEL_1, DIR3_GPIO_Port, DIR3_Pin, 1);
+//  Stepper_SetMinPosition(3, -106.00);
+//  Stepper_SetMaxPosition(3, 106.00);
+
+  Stepper_Setup(3, &htim16, TIM_CHANNEL_1, DIR1_GPIO_Port, DIR1_Pin, 1);
+  Stepper_SetMinPosition(3, -106.00);
+  Stepper_SetMaxPosition(3, 106.00);
   Stepper_Setup(2, &htim17, TIM_CHANNEL_1, DIR2_GPIO_Port, DIR2_Pin, 0);
   Stepper_SetMinPosition(2, -360.00);
   Stepper_SetMaxPosition(2, 360.00);
-  Stepper_Setup(3, &htim13, TIM_CHANNEL_1, DIR3_GPIO_Port, DIR3_Pin, 1);
-  Stepper_SetMinPosition(3, -106.00);
-  Stepper_SetMaxPosition(3, 106.00);
+  Stepper_Setup(1, &htim13, TIM_CHANNEL_1, DIR3_GPIO_Port, DIR3_Pin, 0);
+  Stepper_SetMinPosition(1, -360.00);
+  Stepper_SetMaxPosition(1, 360.00);
+
   Stepper_Setup(4, &htim12, TIM_CHANNEL_2, DIR4_GPIO_Port, DIR4_Pin, 1);
   Stepper_SetMinPosition(4, 0);
   Stepper_SetMaxPosition(4, 150.00);
@@ -215,12 +230,12 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim5);
 
   //PID STEPPER Setup
-  setupPID(1, 0.001, -50, 50, 0.5, 0, 0);
-  setupPID(2, 0.001, -35, 35, 0.5, 0, 0);
-  setupPID(3, 0.05, -800, 800, 1.0, 0, 0);
+  setupPID(1, 0.001, -50, 50, 0.25, 0, 0);
+  setupPID(2, 0.001, -75, 75, 0.25, 0, 0);
+  setupPID(3, 0.001, -1000, 1000, 3.0, 0, 0);
 
   //PID Field Setup
-  setupPID(4, 0.05, -20, 20, 1.0, 0, 0);
+//  setupPID(4, 0.05, -20, 20, 1.0, 0, 0);
 
   //Encoder Setup
   Encoder_Start(1, &htim1, TIM_CHANNEL_ALL);
@@ -232,6 +247,9 @@ int main(void)
   Serial_Setup(1, &huart5);
   Serial_Setup(2, &huart7);
 
+  //Encoder Field
+  set_field_zero();
+
 //  Stepper_updateHome(1, 1);
 //  Stepper_updateHome(2, 1);
 //  Stepper_updateHome(3, 1);
@@ -241,19 +259,21 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  encoder_field = get_real_degree_chess();
+
+	  if((HAL_GetTick() - time) > 1000){
+		  time = HAL_GetTick();
+		  Feedback_XYZ(1, get_fk_X(0), get_fk_Y(0), get_fk_Z(0), get_fk_roll(0));
+	  }
 	  if(state){
-		  update_FK_real();
-//		  Feedback_XYZ(1, get_fk_X(), get_fk_Y(), get_fk_Z(), get_fk_roll());
+		  update_FK_real(0);
+		  update_path();
 //		  Feedback_JOINT(1, , q2, q3, q4);
-//		  updateJoint(0,0,0,0);
 		  Stepper_runStep(1);
 		  Stepper_runStep(2);
 		  Stepper_runStep(3);
 //		  Stepper_runStep(4);
 		  state = 0;
-//		  a1 = HAL_GPIO_ReadPin(PROXIMITY1_GPIO_Port, PROXIMITY1_Pin);
-//		  a2 = HAL_GPIO_ReadPin(PROXIMITY2_GPIO_Port, PROXIMITY2_Pin);
-//		  a3 = HAL_GPIO_ReadPin(PROXIMITY3_GPIO_Port, PROXIMITY3_Pin);
 	  }
 	  selectPacket(1);
 
@@ -550,10 +570,10 @@ static void MX_TIM2_Init(void)
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 0;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 4294967295;
+  htim2.Init.Period = 2000;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  sConfig.EncoderMode = TIM_ENCODERMODE_TI1;
+  sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
   sConfig.IC1Polarity = TIM_ICPOLARITY_RISING;
   sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
   sConfig.IC1Prescaler = TIM_ICPSC_DIV1;

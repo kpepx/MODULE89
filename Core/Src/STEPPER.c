@@ -240,7 +240,7 @@ void Stepper_SetHome(int num, int dir, int on){
 	if(on){
 		if(num == 3){
 			stepper-> home_status = 1;
-			stepper -> STEP_TIMER -> Instance -> PSC = 25;
+			stepper -> STEP_TIMER -> Instance -> PSC = 5;
 			stepper -> STEP_TIMER -> Instance -> ARR = 64000;
 			stepper -> STEP_TIMER -> Instance -> CCR1 = 64000/2;
 			stepper->DIR_GPIO->BSRR = (uint32_t)stepper->DIR_PIN << (16U); //BSRR change pin to set/reset

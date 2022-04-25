@@ -1,3 +1,5 @@
-TRAJECTORY.c:34:6:trajectory	128	static
-TRAJECTORY.c:62:6:run_trajectory	40	static
+TRAJECTORY.c:31:6:trajectory	128	static
+TRAJECTORY.c:61:6:run_trajectory	40	static
 TRAJECTORY.c:79:6:reset_trajectory	24	static
+TRAJECTORY.c:86:8:get_pos	24	static
+TRAJECTORY.c:91:5:get_check_trajectory	24	static
